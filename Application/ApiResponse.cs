@@ -15,6 +15,16 @@
                 Message = msg,
             };
         }
+        public static ApiResponse Error(string msg = "error")
+        {
+            return new ApiResponse()
+            {
+                Success = true,
+                Code = 500,
+                Message = msg,
+            };
+        }
+
 
 
     }
