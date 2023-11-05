@@ -1,6 +1,6 @@
 ﻿using Application;
-using Domain.Entities;
-using Infrastructure;
+using Application.RepositoryInterfaces;
+using Application.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
@@ -9,37 +9,22 @@ namespace WebAPI.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly ApplicationDbContext _db;
-        public UserController(ApplicationDbContext db) 
+        private readonly IUserRepository userRepository;
+        public UserController(IUserRepository _userRepository)
         {
-            _db = db;
+            userRepository = _userRepository;
         }
 
-        [HttpPost]
-        public ApiResponse Create(User u)
-        {
-            try
-            {
-                _db.Add(u);
-                _db.SaveChanges();
-                return ApiResponse.Ok();
-            }
-            catch (Exception)
-            {
-
-                return ApiResponse.Error();
-            }
-
-            
-        }
-
-
-
-
-        //dummy 
         [HttpPost]
         [Route("SignUp")]
-        public ApiResponse Singup()
+        public async Task<ApiResponse> Singup(SignUpRequestModel request)
+        {
+            return await userRepository.SignUp(request);
+        }
+
+        [HttpPost]
+        [Route("Login")]
+        public async Task<ApiResponse> Login()
         {
             return ApiResponse.Ok();
         }
