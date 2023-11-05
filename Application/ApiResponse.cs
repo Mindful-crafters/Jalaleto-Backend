@@ -19,7 +19,7 @@
         {
             return new ApiResponse()
             {
-                Success = true,
+                Success = false,
                 Code = 500,
                 Message = msg,
             };

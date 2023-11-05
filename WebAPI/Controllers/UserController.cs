@@ -9,17 +9,17 @@ namespace WebAPI.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IUserRepository userRepository;
-        public UserController(IUserRepository _userRepository)
+        private readonly IUserRepository _userRepository;
+        public UserController(IUserRepository userRepository)
         {
-            userRepository = _userRepository;
+            _userRepository = userRepository;
         }
 
         [HttpPost]
         [Route("SignUp")]
         public async Task<ApiResponse> Singup(SignUpRequestModel request)
         {
-            return await userRepository.SignUp(request);
+            return await _userRepository.SignUp(request);
         }
 
         [HttpPost]

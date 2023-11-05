@@ -22,13 +22,15 @@ namespace Infrastructure.Repositories
         {
             try
             {
-                await _db.AddAsync(request);
+                User u = new User(request.FirstName, request.LastName, request.UserName, request.Password, request.Mail,request.Brithday);
+                
+                await _db.AddAsync(u);
                 await _db.SaveChangesAsync();
                 return ApiResponse.Ok();
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return ApiResponse.Error();
+                return ApiResponse.Error(e.Message);
             }
         }
     }
