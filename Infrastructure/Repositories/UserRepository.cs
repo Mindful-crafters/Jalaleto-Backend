@@ -63,7 +63,7 @@ namespace Infrastructure.Repositories
                 //    throw new Exception("Invalid birthday");
 
                 
-                string HashedPassword = HashService.CreateHash(request.Password);
+                string HashedPassword = PasswordStorage.CreateHash(request.Password);
 
                 User u = new User(request.FirstName, request.LastName, request.UserName, HashedPassword, request.Mail,request.Birthday);
                 
