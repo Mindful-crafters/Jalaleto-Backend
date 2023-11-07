@@ -24,9 +24,9 @@ namespace WebAPI.Controllers
 
         [HttpPost]
         [Route("Login")]
-        public async Task<ApiResponse> Login()
+        public async Task<ApiResponse> Login(LoginRequestModel request)
         {
-            return ApiResponse.Ok();
+            return await _userRepository.Login(request);
         }
 
     }

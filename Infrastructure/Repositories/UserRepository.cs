@@ -2,23 +2,83 @@
 using Application.RepositoryInterfaces;
 using Application.ViewModel;
 using Domain.Entities;
-using System.Text.RegularExpressions;
 using Infrastructure.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Infrastructure.Repositories
 {
     public class UserRepository : IUserRepository
     {
         private readonly ApplicationDbContext _db;
-        public UserRepository(ApplicationDbContext db)
+        private readonly IConfiguration _configuration;
+
+        public UserRepository(ApplicationDbContext db, IConfiguration configuration)
         {
             _db = db;
+            _configuration = configuration;
         }
 
-        public async Task<ApiResponse> Login(string username, string password)
+        public async Task<ApiResponse> Login(LoginRequestModel request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                // Validate the input
+                if (string.IsNullOrEmpty(request.UserName) || string.IsNullOrEmpty(request.Password))
+                {
+                    throw new Exception("Invalid username or password");
+                }
+
+                // Retrieve the user from the database based on the username
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.UserName.ToLower() == request.UserName.ToLower());
+
+                if (user == null)
+                {
+                    throw new Exception("User not found");
+                }
+
+                // Verify the password
+                if (!PasswordStorage.VerifyPassword(request.Password, user.Password))
+                {
+                    throw new Exception("Invalid password");
+                }
+
+                // Read the secret key from appsettings.json
+                var secretKey = _configuration.GetSection("AppSettings:SecretKey").Value!;
+
+                // Generate a JWT token
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes(secretKey);
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new Claim[]
+                    {
+                        new Claim(ClaimTypes.Name, user.UserName),
+                        new Claim(ClaimTypes.Email, user.Mail),
+                        new Claim(ClaimTypes.GivenName, user.FirstName + user.LastName),
+                    }),
+                    Expires = DateTime.UtcNow.AddHours(1), // Set the token expiration time
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+
+                // Serialize the token to a string
+                var tokenString = tokenHandler.WriteToken(token);
+
+                // Return the JWT token as part of the response
+                return new LoginResponseModel(tokenString);
+            }
+            catch (Exception e)
+            {
+                return ApiResponse.Error(e.Message);
+            }
         }
+
 
         public async Task<ApiResponse> SignUp(SignUpRequestModel request)
         {
@@ -40,7 +100,7 @@ namespace Infrastructure.Repositories
                     {
                         throw new Exception("This username already exists.");
                     }
-                    if(user.Mail.ToLower() == request.Mail.ToLower())
+                    if (user.Mail.ToLower() == request.Mail.ToLower())
                     {
                         throw new Exception("This Mail in already in use.");
                     }
@@ -62,11 +122,11 @@ namespace Infrastructure.Repositories
                 //if (now < request.Birthday || CurrentYear - BYear > 100 || BMonth > 12 || BDay > 30)
                 //    throw new Exception("Invalid birthday");
 
-                
+
                 string HashedPassword = PasswordStorage.CreateHash(request.Password);
 
-                User u = new User(request.FirstName, request.LastName, request.UserName, HashedPassword, request.Mail,request.Birthday);
-                
+                User u = new User(request.FirstName, request.LastName, request.UserName, HashedPassword, request.Mail, request.Birthday);
+
                 await _db.AddAsync(u);
                 await _db.SaveChangesAsync();
                 return ApiResponse.Ok();
