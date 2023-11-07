@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Infrastructure.Security
+namespace Infrastructure.Services
 {
 
     //info : https://github.com/defuse/password-hashing/blob/master/README.md

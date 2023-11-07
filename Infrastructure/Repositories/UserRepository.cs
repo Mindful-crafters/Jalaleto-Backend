@@ -3,7 +3,7 @@ using Application.RepositoryInterfaces;
 using Application.ViewModel;
 using Domain.Entities;
 using System.Text.RegularExpressions;
-using Infrastructure.Security;
+using Infrastructure.Services;
 
 namespace Infrastructure.Repositories
 {
@@ -62,9 +62,8 @@ namespace Infrastructure.Repositories
                 //if (now < request.Birthday || CurrentYear - BYear > 100 || BMonth > 12 || BDay > 30)
                 //    throw new Exception("Invalid birthday");
 
-
-                string UsernameAndPass = request.UserName + request.Password;
-                string HashedPassword = PasswordStorage.CreateHash(UsernameAndPass);
+                
+                string HashedPassword = HashService.CreateHash(request.Password);
 
                 User u = new User(request.FirstName, request.LastName, request.UserName, HashedPassword, request.Mail,request.Birthday);
                 
