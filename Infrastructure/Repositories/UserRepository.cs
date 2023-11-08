@@ -42,10 +42,10 @@ namespace Infrastructure.Repositories
                 }
 
                 // Verify the password
-                //if (!PasswordStorage.VerifyPassword(request.Password, user.Password))
-                //{
-                //    throw new Exception("Invalid password");
-                //}
+                if (!HashService.VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
+                {
+                    throw new Exception("Password is incorrect.");
+                }
 
                 // Read the secret key from appsettings.json
                 var secretKey = _configuration.GetSection("AppSettings:SecretKey").Value!;
