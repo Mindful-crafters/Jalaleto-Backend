@@ -9,7 +9,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Infrastructure.Repositories
 {
@@ -43,10 +42,10 @@ namespace Infrastructure.Repositories
                 }
 
                 // Verify the password
-                if (!PasswordStorage.VerifyPassword(request.Password, user.Password))
-                {
-                    throw new Exception("Invalid password");
-                }
+                //if (!PasswordStorage.VerifyPassword(request.Password, user.Password))
+                //{
+                //    throw new Exception("Invalid password");
+                //}
 
                 // Read the secret key from appsettings.json
                 var secretKey = _configuration.GetSection("AppSettings:SecretKey").Value!;
@@ -84,48 +83,24 @@ namespace Infrastructure.Repositories
         {
             try
             {
-                if (request.UserName.Length < 8)
-                    throw new Exception("Invalid username (length)");
-                if (request.Password.Length < 8)
-                    throw new Exception("Invalid password (length)");
-                IEnumerable<User> userList = _db.Users;
-                string strRegex = @"(^([a-zA-Z0-9]{1,10})@([a-zA-Z0-9]{1,32}\.([a-zA-Z0-9]{1,32}))$)";
-                Regex re = new Regex(strRegex, RegexOptions.IgnoreCase);
-                if (!re.IsMatch(request.Mail))
-                    throw new Exception("Not a valid email!");
-
-                foreach (var user in userList)
+                //check for uniqe username and email
+                if (_db.Users.Any(u => u.UserName == request.UserName))
                 {
-                    if (user.UserName.ToLower() == request.UserName.ToLower())
-                    {
-                        throw new Exception("This username already exists.");
-                    }
-                    if (user.Mail.ToLower() == request.Mail.ToLower())
-                    {
-                        throw new Exception("This Mail in already in use.");
-                    }
+                    return ApiResponse.Error("User already exists.");
                 }
+                if (_db.Users.Any(u => u.Mail == request.Mail))
+                {
+                    return ApiResponse.Error("Mail already in use.");
+                }
+                //check valid birthday
                 DateOnly now = DateOnly.FromDateTime(DateTime.Now);
                 if (now < request.Birthday)
-                    throw new Exception("Invalid birthday");
+                    return ApiResponse.Error("Invalid birthday.");
 
+                //generate hash
+                HashService.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
-                //int CurrentYear = DateTime.Now.Year;
-                //int BYear = request.Birthday.Year;
-
-                //int CurrentMonth = DateTime.Now.Month;
-                //int BMonth = request.Birthday.Month;
-
-                //int CurrentDay = DateTime.Now.Day;
-                //int BDay = request.Birthday.Day;
-
-                //if (now < request.Birthday || CurrentYear - BYear > 100 || BMonth > 12 || BDay > 30)
-                //    throw new Exception("Invalid birthday");
-
-
-                string HashedPassword = PasswordStorage.CreateHash(request.Password);
-
-                User u = new User(request.FirstName, request.LastName, request.UserName, HashedPassword, request.Mail, request.Birthday);
+                User u = new User(request.FirstName, request.LastName, request.UserName, passwordHash, passwordSalt, request.Mail, request.Birthday);
 
                 await _db.AddAsync(u);
                 await _db.SaveChangesAsync();
