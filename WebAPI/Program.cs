@@ -16,7 +16,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-
+builder.Services.AddScoped<IEmailRepository, EmailRepository>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
