@@ -7,7 +7,6 @@ namespace Infrastructure.Services
 {
     public static class HashService
     {
-        static IConfiguration _config = ConfigurationHelper.config;
         public static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             using (var hmac = new HMACSHA512())
@@ -27,7 +26,7 @@ namespace Infrastructure.Services
             }
         }
 
-        public static byte[] CalculateSHA256(string str)
+        public static byte[] CalculateSHA256(IConfiguration _config, string str)
         {
             SHA256 sha256 = SHA256.Create();
             byte[] hashValue;

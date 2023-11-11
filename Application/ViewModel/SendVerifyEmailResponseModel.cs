@@ -2,13 +2,13 @@
 {
     public class SendVerifyEmailResponseModel : ApiResponse
     {
-        public SendVerifyEmailResponseModel(string hash)
+        public SendVerifyEmailResponseModel(byte[] hash)
         {
             this.Success = true;
             this.Code = 200;
             this.Message = "Email sent";
             this.HashString = hash;
         }
-        public string HashString { get; set; } = string.Empty;
+        public byte[] HashString { get; set; }
     }
 }

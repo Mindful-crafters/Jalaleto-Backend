@@ -82,6 +82,16 @@ namespace Infrastructure.Repositories
         {
             try
             {
+                var hash = HashService.CalculateSHA256(_configuration, request.Code.ToString() + request.Mail);
+                if(!hash.SequenceEqual(request.HashString))
+                {
+                    return new ApiResponse()
+                    {
+                        Success = false,
+                        Code = 300,
+                        Message = "Incorect verification code",
+                    };
+                }
                 //check for uniqe username and email
                 if (_db.Users.Any(u => u.UserName == request.UserName))
                 {
@@ -118,9 +128,9 @@ namespace Infrastructure.Repositories
                 Random generator = new Random();
                 string code = generator.Next(100000, 999999).ToString();
                 string subject = "کد تایید جلالتو";
-                await EmailService.SendMail(request.email, subject, code);
+                await EmailService.SendMail(_configuration, request.email, subject, code);
 
-                string hashString = "";//HashService.Hash(code + email);
+                var hashString = HashService.CalculateSHA256(_configuration, code + request.email)!;
                 return new SendVerifyEmailResponseModel(hashString);
             }
             catch (Exception ex)
