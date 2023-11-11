@@ -1,6 +1,7 @@
 ﻿using Application;
 using Application.RepositoryInterfaces;
 using Application.ViewModel;
+using Azure.Core;
 using Domain.Entities;
 using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,31 @@ namespace Infrastructure.Repositories
         {
             _db = db;
             _configuration = configuration;
+        }
+
+        public async Task<ApiResponse> CheckUsername(string userName)
+        {
+            try
+            {
+                // Retrieve the user from the database based on the username
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.UserName.ToLower() == userName.ToLower());
+
+                if (user == null)
+                {
+                    return ApiResponse.Ok("the username is valid");
+                }
+
+                return new ApiResponse()
+                {
+                    Success = false,
+                    Code = 400,
+                    Message = "the username is already taken!",
+                };
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse.Error(ex.Message);
+            }
         }
 
         public async Task<ApiResponse> Login(LoginRequestModel request)

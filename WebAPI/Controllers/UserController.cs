@@ -29,5 +29,12 @@ namespace WebAPI.Controllers
             return await _userRepository.Login(request);
         }
 
+        [HttpPost]
+        [Route("CheckUsername")]
+        public async Task<ApiResponse> CheckUsername(string userName)
+        {
+            return await _userRepository.CheckUsername(userName);
+        }
+
     }
 }
