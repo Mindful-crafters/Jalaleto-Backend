@@ -29,5 +29,11 @@ namespace WebAPI.Controllers
             return await _userRepository.Login(request);
         }
 
+        [HttpPost]
+        [Route("SendEmail")]
+        public async Task<ApiResponse> SendVerifyEmail(string email)
+        {
+            return await _userRepository.SendVerifyEmail(email);
+        }
     }
 }

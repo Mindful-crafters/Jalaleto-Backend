@@ -10,18 +10,18 @@ namespace Infrastructure.Services
     public static class EmailService
     {
         static IConfiguration _config = ConfigurationHelper.config;
-        public static void SendMail(EmailRequestModel request)
+        public static void SendMail(string email, string subject, string body)
         {
-            var email = new MimeMessage();
-            email.From.Add(MailboxAddress.Parse(_config.GetSection("EmailUsername").Value));
-            email.To.Add(MailboxAddress.Parse(request.To));
-            email.Subject = request.Subject;
-            email.Body = new TextPart(TextFormat.Html) { Text = request.Body };
+            var emailModel = new MimeMessage();
+            emailModel.From.Add(MailboxAddress.Parse(_config.GetSection("EmailUsername").Value));
+            emailModel.To.Add(MailboxAddress.Parse(email));
+            emailModel.Subject = subject;
+            emailModel.Body = new TextPart(TextFormat.Html) { Text = body };
 
             using var smtp = new SmtpClient();
             smtp.Connect(_config.GetSection("EmailHost").Value, 587, SecureSocketOptions.StartTls);
             smtp.Authenticate(_config.GetSection("EmailUsername").Value, _config.GetSection("EmailPassword").Value);
-            smtp.Send(email);
+            smtp.Send(emailModel);
             smtp.Disconnect(true);
         }
     }

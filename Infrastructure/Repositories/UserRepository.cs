@@ -1,7 +1,6 @@
 ﻿using Application;
 using Application.RepositoryInterfaces;
 using Application.ViewModel;
-using Azure.Core;
 using Domain.Entities;
 using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
@@ -73,9 +72,9 @@ namespace Infrastructure.Repositories
                 // Return the JWT token as part of the response
                 return new LoginResponseModel(tokenString);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                return ApiResponse.Error(e.Message);
+                return ApiResponse.Error(ex.Message);
             }
         }
 
@@ -106,12 +105,29 @@ namespace Infrastructure.Repositories
                 await _db.SaveChangesAsync();
                 return ApiResponse.Ok();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                return ApiResponse.Error(e.Message);
+                return ApiResponse.Error(ex.Message);
             }
         }
 
-        
+        public async Task<ApiResponse> SendVerifyEmail(string email)
+        {
+            try
+            {
+                Random generator = new Random();
+                string code = generator.Next(100000, 999999).ToString();
+                string subject = "کد تایید جلالتو";
+                EmailService.SendMail(email, subject, code);
+
+                string hashString = "";
+                //HashService.Hash(code + email);
+                return new SendVerifyEmailResponseModel(hashString);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse.Error(ex.Message);
+            }
+        }
     }
 }
