@@ -111,17 +111,16 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task<ApiResponse> SendVerifyEmail(string email)
+        public async Task<ApiResponse> SendVerifyEmail(SendVerifyEmailRequestModel request)
         {
             try
             {
                 Random generator = new Random();
                 string code = generator.Next(100000, 999999).ToString();
                 string subject = "کد تایید جلالتو";
-                EmailService.SendMail(email, subject, code);
+                await EmailService.SendMail(request.email, subject, code);
 
-                string hashString = "";
-                //HashService.Hash(code + email);
+                string hashString = "";//HashService.Hash(code + email);
                 return new SendVerifyEmailResponseModel(hashString);
             }
             catch (Exception ex)
