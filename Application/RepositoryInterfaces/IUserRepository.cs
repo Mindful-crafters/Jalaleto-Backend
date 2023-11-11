@@ -8,5 +8,7 @@ namespace Application.RepositoryInterfaces
         public Task<ApiResponse> Login(LoginRequestModel request);
         public Task<ApiResponse> SignUp(SignUpRequestModel request);
         public Task<ApiResponse> SendVerifyEmail(SendVerifyEmailRequestModel request);
+        public Task<ApiResponse> SendRestPasswordEmail(SendVerifyEmailRequestModel request);
+        public Task<ApiResponse> ResetPassword(ResetPasswordRequestModel request);
     }
 }
