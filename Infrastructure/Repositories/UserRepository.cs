@@ -24,31 +24,6 @@ namespace Infrastructure.Repositories
             _configuration = configuration;
         }
 
-        public async Task<ApiResponse> CheckUsername(string userName)
-        {
-            try
-            {
-                // Retrieve the user from the database based on the username
-                var user = await _db.Users.FirstOrDefaultAsync(u => u.UserName.ToLower() == userName.ToLower());
-
-                if (user == null)
-                {
-                    return ApiResponse.Ok("the username is valid");
-                }
-
-                return new ApiResponse()
-                {
-                    Success = false,
-                    Code = 400,
-                    Message = "the username is already taken!",
-                };
-            }
-            catch (Exception ex)
-            {
-                return ApiResponse.Error(ex.Message);
-            }
-        }
-
         public async Task<ApiResponse> Login(LoginRequestModel request)
         {
             try
@@ -104,7 +79,6 @@ namespace Infrastructure.Repositories
             }
         }
 
-
         public async Task<ApiResponse> SignUp(SignUpRequestModel request)
         {
             try
@@ -137,5 +111,7 @@ namespace Infrastructure.Repositories
                 return ApiResponse.Error(e.Message);
             }
         }
+
+        
     }
 }

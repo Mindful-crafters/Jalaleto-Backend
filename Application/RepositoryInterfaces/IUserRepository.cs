@@ -7,6 +7,5 @@ namespace Application.RepositoryInterfaces
     {
         public Task<ApiResponse> Login(LoginRequestModel request);
         public Task<ApiResponse> SignUp(SignUpRequestModel request);
-        public Task<ApiResponse> CheckUsername(string userName);
     }
 }

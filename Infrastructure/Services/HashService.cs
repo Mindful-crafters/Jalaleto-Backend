@@ -1,10 +1,8 @@
 ﻿using System.Security.Cryptography;
-using System.Text;
 
 namespace Infrastructure.Services
 {
-
-    class HashService
+    public static class HashService
     {
         public static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
