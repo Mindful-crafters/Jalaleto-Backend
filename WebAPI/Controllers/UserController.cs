@@ -30,10 +30,25 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost]
-        [Route("SendEmail")]
+        [Route("SendVerifyEmail")]
         public async Task<ApiResponse> SendVerifyEmail(SendVerifyEmailRequestModel request)
         {
             return await _userRepository.SendVerifyEmail(request);
+        }
+
+        [HttpPost]
+        [Route("SendRestPasswordEmail")]
+        public async Task<ApiResponse> SendRestPasswordEmail(SendVerifyEmailRequestModel request)
+        {
+            return await _userRepository.SendRestPasswordEmail(request);
+        }
+
+        [HttpPost]
+        [Route("ResetPassword")]
+        public async Task<ApiResponse> ResetPassword(ResetPasswordRequestModel request)
+        {
+            return await _userRepository.ResetPassword(request);
+
         }
     }
 }

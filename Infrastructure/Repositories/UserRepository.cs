@@ -83,7 +83,7 @@ namespace Infrastructure.Repositories
             try
             {
                 var hash = HashService.CalculateSHA256(_configuration, request.Code.ToString() + request.Mail);
-                if(!hash.SequenceEqual(request.HashString))
+                if (!hash.SequenceEqual(request.HashString))
                 {
                     return new ApiResponse()
                     {
@@ -110,7 +110,7 @@ namespace Infrastructure.Repositories
                 HashService.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
                 User u = new User(request.FirstName, request.LastName, request.UserName, passwordHash, passwordSalt, request.Mail, request.Birthday);
-
+               
                 await _db.AddAsync(u);
                 await _db.SaveChangesAsync();
                 return ApiResponse.Ok();
@@ -125,6 +125,10 @@ namespace Infrastructure.Repositories
         {
             try
             {
+                if (_db.Users.Any(u => u.Mail == request.email))
+                {
+                    return ApiResponse.Error("Mail already in use.");
+                }
                 Random generator = new Random();
                 string code = generator.Next(100000, 999999).ToString();
                 string subject = "کد تایید جلالتو";
@@ -132,6 +136,58 @@ namespace Infrastructure.Repositories
 
                 var hashString = HashService.CalculateSHA256(_configuration, code + request.email)!;
                 return new SendVerifyEmailResponseModel(hashString);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse.Error(ex.Message);
+            }
+        }
+        public async Task<ApiResponse> SendRestPasswordEmail(SendVerifyEmailRequestModel request)
+        {
+            try
+            {
+                if (!_db.Users.Any(u => u.Mail == request.email))
+                {
+                    return ApiResponse.Error("Email is not registerd.");
+                }
+                Random generator = new Random();
+                string code = generator.Next(100000, 999999).ToString();
+                string subject = "کد تایید تغییر پسورد جلالتو";
+                await EmailService.SendMail(_configuration, request.email, subject, code);
+
+                var hashString = HashService.CalculateSHA256(_configuration, code + request.email)!;
+                return new SendVerifyEmailResponseModel(hashString);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse.Error(ex.Message);
+            }
+        }
+        public async Task<ApiResponse> ResetPassword(ResetPasswordRequestModel request)
+        {
+            try
+            {
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Mail == request.Mail);
+                if (user == null)
+                {
+                    return ApiResponse.Error("No user with such email was found");
+                }
+                var hash = HashService.CalculateSHA256(_configuration, request.Code.ToString() + request.Mail);
+                if (!hash.SequenceEqual(request.HashString))
+                {
+                    return new ApiResponse()
+                    {
+                        Success = false,
+                        Code = 300,
+                        Message = "Incorect verification code",
+                    };
+                }
+                HashService.CreatePasswordHash(request.NewPassword, out byte[] passwordHash, out byte[] passwordSalt);
+                user.PasswordHash = passwordHash;
+                user.PasswordSalt = passwordSalt;
+                await _db.SaveChangesAsync();
+                return ApiResponse.Ok("Password successfully changed");
+
             }
             catch (Exception ex)
             {
