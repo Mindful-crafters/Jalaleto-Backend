@@ -6,6 +6,7 @@ using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.VisualBasic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -188,6 +189,25 @@ namespace Infrastructure.Repositories
                 await _db.SaveChangesAsync();
                 return ApiResponse.Ok("Password successfully changed");
 
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse.Error(ex.Message);
+            }
+        }
+        public async Task<ApiResponse> CheckEmail(string email)
+        {
+            try
+            {
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Mail == email);
+                if (user == null)
+                {
+                    return new CheckEmailResponseModel(false);
+                }
+                else
+                {
+                    return new CheckEmailResponseModel(true);
+                }
             }
             catch (Exception ex)
             {

@@ -50,5 +50,12 @@ namespace WebAPI.Controllers
             return await _userRepository.ResetPassword(request);
 
         }
+        [HttpPost]
+        [Route("CheckEmail")]
+        public async Task<ApiResponse> CheckEmail(string email)
+        {
+            return await _userRepository.CheckEmail(email);
+
+        }
     }
 }
