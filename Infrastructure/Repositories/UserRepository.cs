@@ -195,11 +195,11 @@ namespace Infrastructure.Repositories
                 return ApiResponse.Error(ex.Message);
             }
         }
-        public async Task<ApiResponse> CheckEmail(string email)
+        public async Task<ApiResponse> CheckEmail(SendVerifyEmailRequestModel request)
         {
             try
             {
-                var user = await _db.Users.FirstOrDefaultAsync(u => u.Mail == email);
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Mail == request.email);
                 if (user == null)
                 {
                     return new CheckEmailResponseModel(false);

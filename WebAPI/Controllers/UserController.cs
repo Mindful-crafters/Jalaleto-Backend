@@ -52,9 +52,9 @@ namespace WebAPI.Controllers
         }
         [HttpPost]
         [Route("CheckEmail")]
-        public async Task<ApiResponse> CheckEmail(string email)
+        public async Task<ApiResponse> CheckEmail(SendVerifyEmailRequestModel request)
         {
-            return await _userRepository.CheckEmail(email);
+            return await _userRepository.CheckEmail(request);
 
         }
     }

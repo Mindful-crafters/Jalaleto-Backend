@@ -10,6 +10,6 @@ namespace Application.RepositoryInterfaces
         public Task<ApiResponse> SendVerifyEmail(SendVerifyEmailRequestModel request);
         public Task<ApiResponse> SendRestPasswordEmail(SendVerifyEmailRequestModel request);
         public Task<ApiResponse> ResetPassword(ResetPasswordRequestModel request);
-        public Task<ApiResponse> CheckEmail(string email);
+        public Task<ApiResponse> CheckEmail(SendVerifyEmailRequestModel request);
     }
 }
