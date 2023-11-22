@@ -11,5 +11,7 @@ namespace Application.RepositoryInterfaces
         public Task<ApiResponse> SendRestPasswordEmail(SendVerifyEmailRequestModel request);
         public Task<ApiResponse> ResetPassword(ResetPasswordRequestModel request);
         public Task<ApiResponse> CheckEmail(SendVerifyEmailRequestModel request);
+        public Task<ApiResponse> ProfileInfo(string JwtToken);
+        public Task<ApiResponse> EditProfileInfo(EditProfileInfoRequestModel request);
     }
 }

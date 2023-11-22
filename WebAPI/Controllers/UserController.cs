@@ -57,5 +57,17 @@ namespace WebAPI.Controllers
             return await _userRepository.CheckEmail(request);
 
         }
+        [HttpGet]
+        [Route("ProfileInfo")]
+        public async Task<ApiResponse> ProfileInfo(string JwtToken)
+        {
+            return await _userRepository.ProfileInfo(JwtToken);
+        }
+        [HttpPost]
+        [Route("EditProfile")]
+        public async Task<ApiResponse> EditProfileInfo(EditProfileInfoRequestModel request)
+        {
+            return await _userRepository.EditProfileInfo(request);
+        }
     }
 }
