@@ -5,6 +5,7 @@
     "anonymousAuthentication": true,
     "iisExpress": {
       "applicationUrl": "http://localhost:35398",
+      //"applicationUrl": "https://dev.jalaleto.ir/",
       "sslPort": 44381
     }
   },
