@@ -26,6 +26,7 @@ namespace Infrastructure.Services
             }
         }
 
+        //random token hash equivalence
         public static byte[] CalculateSHA256(IConfiguration _config, string str)
         {
             SHA256 sha256 = SHA256.Create();
