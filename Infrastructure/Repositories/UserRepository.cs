@@ -3,11 +3,11 @@ using Application.RepositoryInterfaces;
 using Application.ViewModel;
 using Domain.Entities;
 using Infrastructure.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.VisualBasic;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -68,7 +68,7 @@ namespace Infrastructure.Repositories
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
                 var token = tokenHandler.CreateToken(tokenDescriptor);
-                
+
                 // Serialize the token to a string
                 var tokenString = tokenHandler.WriteToken(token);
 
@@ -113,7 +113,7 @@ namespace Infrastructure.Repositories
                 HashService.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
                 User u = new User(request.FirstName, request.LastName, request.UserName, passwordHash, passwordSalt, request.Mail, request.Birthday);
-               
+
                 await _db.AddAsync(u);
                 await _db.SaveChangesAsync();
                 return ApiResponse.Ok();
@@ -238,7 +238,7 @@ namespace Infrastructure.Repositories
                 var jwtToken = (JwtSecurityToken)validatedToken;
 
                 var email = jwtToken.Claims.First(x => x.Type == "email").Value;
-               
+
                 if (email == null)
                 {
                     return ApiResponse.Error("invalid token");
@@ -249,8 +249,8 @@ namespace Infrastructure.Repositories
                 {
                     return ApiResponse.Error("No user with such email was found");
                 }
-                string Birthday =  user.Birthday.ToString("dd/M/yyyy", CultureInfo.InvariantCulture);
-                return new ProfileInfoResponseModel(user.FirstName, user.LastName, user.UserName, Birthday);
+                string Birthday = user.Birthday.ToString("dd/M/yyyy", CultureInfo.InvariantCulture);
+                return new ProfileInfoResponseModel(user.FirstName, user.LastName, user.UserName, Birthday, user.Mail, user.ImageData);
             }
             catch (Exception ex)
             {
@@ -301,14 +301,14 @@ namespace Infrastructure.Repositories
                     return ApiResponse.Error("No user with such email was found");
                 }
                 user.FirstName = request.FirstName;
-                user.LastName = request.LastName;           
+                user.LastName = request.LastName;
 
                 // casting to date time because efcore gave error for dateonly field in
                 // creating datebase and in in User.cs we coverted it back to dateonly
                 // with [Column(TypeName = "Date")]
-                user.Birthday = request.Birthday.ToDateTime(TimeOnly.Parse("10:00 PM")); 
+                user.Birthday = request.Birthday.ToDateTime(TimeOnly.Parse("10:00 PM"));
 
-                if(username != request.UserName)
+                if (user.UserName != request.UserName)
                 {
                     user.UserName = "WaitedToBeChanged"; // check other usernames except it self
                     await _db.SaveChangesAsync();
@@ -328,5 +328,71 @@ namespace Infrastructure.Repositories
 
         }
 
+        public async Task<ApiResponse> UploadImage([FromForm] IFormFile image, string JwtToken)
+        {
+            try
+            {
+                var secretKey = _configuration.GetSection("AppSettings:SecretKey").Value!;
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes(secretKey);
+                tokenHandler.ValidateToken(JwtToken, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    // set clockskew to zero so tokens expire exactly at token expiration time
+                    // (instead of 5 minutes later)
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
+
+                var jwtToken = (JwtSecurityToken)validatedToken;
+
+
+                //extracting email from jwt token
+
+                /*use x.Type == claimPropertyName  
+                 * claimPropertyName ==
+                     * "unique_name" for username
+                     * "email" for email
+                     * "given_name" for givenName               
+                 * ""
+                */
+                var email = jwtToken.Claims.First(x => x.Type == "email").Value;
+
+                if (email == null)
+                {
+                    return ApiResponse.Error("invalid token");
+                }
+
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Mail == email);
+                if (user == null)
+                {
+                    return ApiResponse.Error("No user with such email was found");
+                }
+
+
+
+                if (image == null || image.Length == 0)
+                    return ApiResponse.Error("File is null or empty");
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    await image.CopyToAsync(memoryStream);
+
+                    user.ImageData = memoryStream.ToArray();
+
+                    // Save image to the database
+                    await _db.SaveChangesAsync();
+                    return ApiResponse.Ok("Image uploaded successfully");
+
+
+                }
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse.Error(ex.Message);
+            }
+        }
     }
 }

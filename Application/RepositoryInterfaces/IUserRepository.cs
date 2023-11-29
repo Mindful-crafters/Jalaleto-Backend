@@ -1,5 +1,6 @@
 ﻿using Application.ViewModel;
 using Domain.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.RepositoryInterfaces
 {
@@ -13,5 +14,7 @@ namespace Application.RepositoryInterfaces
         public Task<ApiResponse> CheckEmail(SendVerifyEmailRequestModel request);
         public Task<ApiResponse> ProfileInfo(string JwtToken);
         public Task<ApiResponse> EditProfileInfo(EditProfileInfoRequestModel request);
+        public Task<ApiResponse> UploadImage(IFormFile request,string JwtToken);
+        
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Application.ViewModel
 {
@@ -12,8 +13,10 @@ namespace Application.ViewModel
         public string LastName { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;
         public string Birthday { get; set; }
+        public string Email { get; set; }
+        public byte[] Image { get; set; }
 
-        public ProfileInfoResponseModel(string FirstName, string LastName, string Username, string birthday)
+        public ProfileInfoResponseModel(string FirstName, string LastName, string Username, string birthday, string email, byte[] image)
         {
             this.Success = true;
             this.Code = 200;
@@ -22,6 +25,8 @@ namespace Application.ViewModel
             this.LastName = LastName;
             this.UserName = Username;
             this.Birthday = birthday;
+            this.Email = email;
+            this.Image = image;
         }
     }
 }

@@ -69,5 +69,13 @@ namespace WebAPI.Controllers
         {
             return await _userRepository.EditProfileInfo(request);
         }
+        [HttpPost]
+        [Route("UploadImage")]
+        public async Task<ApiResponse> UploadImage(IFormFile file, string JwtToken)
+        {
+            return await _userRepository.UploadImage(file, JwtToken);
+        }
+
+        
     }
 }
