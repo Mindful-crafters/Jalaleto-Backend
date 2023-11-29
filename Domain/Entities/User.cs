@@ -18,6 +18,7 @@ namespace Domain.Entities
             PasswordSalt = passwordSalt;
             Mail = mail;
             Birthday = birthday.ToDateTime(TimeOnly.Parse("10:00 PM"));
+            ImageData = new byte[byte.MaxValue];    
         }
         public Guid Id { get; set; }
         public string Mail { get; set; }
@@ -28,8 +29,8 @@ namespace Domain.Entities
         public DateTime Birthday { get; set; }
         public byte[] PasswordHash { get; set; } = new byte[32];
         public byte[] PasswordSalt { get; set; } = new byte[32];
-       
         public DateTime CreatedTime { get; set; } = DateTime.Now;
-        
+        public byte[] ImageData { get; set; } 
+
     }
 }
