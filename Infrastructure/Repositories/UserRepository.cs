@@ -60,6 +60,7 @@ namespace Infrastructure.Repositories
                 {
                     Subject = new ClaimsIdentity(new Claim[]
                     {
+                        new Claim("UserId", user.Id.ToString()),
                         new Claim(ClaimTypes.Name, user.UserName),
                         new Claim(ClaimTypes.Email, user.Mail),
                         new Claim(ClaimTypes.GivenName, user.FirstName + user.LastName),
@@ -135,9 +136,9 @@ namespace Infrastructure.Repositories
                 Random generator = new Random();
                 string code = generator.Next(100000, 999999).ToString();
                 string subject = "کد تایید جلالتو";
+                var hashString = HashService.CalculateSHA256(_configuration, code + request.email)!;
                 await EmailService.SendMail(_configuration, request.email, subject, code);
 
-                var hashString = HashService.CalculateSHA256(_configuration, code + request.email)!;
                 return new SendVerifyEmailResponseModel(hashString);
             }
             catch (Exception ex)
@@ -145,6 +146,7 @@ namespace Infrastructure.Repositories
                 return ApiResponse.Error(ex.Message);
             }
         }
+
         public async Task<ApiResponse> SendRestPasswordEmail(SendVerifyEmailRequestModel request)
         {
             try
@@ -166,6 +168,7 @@ namespace Infrastructure.Repositories
                 return ApiResponse.Error(ex.Message);
             }
         }
+
         public async Task<ApiResponse> ResetPassword(ResetPasswordRequestModel request)
         {
             try
@@ -197,6 +200,7 @@ namespace Infrastructure.Repositories
                 return ApiResponse.Error(ex.Message);
             }
         }
+
         public async Task<ApiResponse> CheckEmail(SendVerifyEmailRequestModel request)
         {
             try
