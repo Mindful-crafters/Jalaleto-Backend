@@ -221,37 +221,15 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task<ApiResponse> ProfileInfo(string JwtToken)
+        public async Task<ApiResponse> ProfileInfo(Guid userId)
         {
             try
             {
-                var secretKey = _configuration.GetSection("AppSettings:SecretKey").Value!;
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(secretKey);
-                tokenHandler.ValidateToken(JwtToken, new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    // set clockskew to zero so tokens expire exactly at token expiration time
-                    // (instead of 5 minutes later)
-                    ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken);
-
-                var jwtToken = (JwtSecurityToken)validatedToken;
-
-                var email = jwtToken.Claims.First(x => x.Type == "email").Value;
-
-                if (email == null)
-                {
-                    return ApiResponse.Error("invalid token");
-                }
-
-                var user = await _db.Users.FirstOrDefaultAsync(u => u.Mail == email);
+                
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
                 if (user == null)
                 {
-                    return ApiResponse.Error("No user with such email was found");
+                    return ApiResponse.Error("user not found");
                 }
                 string Birthday = user.Birthday.ToString("dd/M/yyyy", CultureInfo.InvariantCulture);
                 return new ProfileInfoResponseModel(user.FirstName, user.LastName, user.UserName, Birthday, user.Mail, user.ImageData);
@@ -262,44 +240,12 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task<ApiResponse> EditProfileInfo(EditProfileInfoRequestModel request)
+        public async Task<ApiResponse> EditProfileInfo(EditProfileInfoRequestModel request, Guid userId)
         {
             try
             {
-                var secretKey = _configuration.GetSection("AppSettings:SecretKey").Value!;
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(secretKey);
-                tokenHandler.ValidateToken(request.JwtToken, new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    // set clockskew to zero so tokens expire exactly at token expiration time
-                    // (instead of 5 minutes later)
-                    ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken);
-
-                var jwtToken = (JwtSecurityToken)validatedToken;
-
-
-                //extracting email from jwt token
-
-                /*use x.Type == claimPropertyName  
-                 * claimPropertyName ==
-                     * "unique_name" for username
-                     * "email" for email
-                     * "given_name" for givenName               
-                 * ""
-                */
-                var email = jwtToken.Claims.First(x => x.Type == "email").Value;
-                var username = jwtToken.Claims.First(x => x.Type == "unique_name").Value;
-                if (email == null || username == null)
-                {
-                    return ApiResponse.Error("invalid token");
-                }
-
-                var user = await _db.Users.FirstOrDefaultAsync(u => u.Mail == email);
+               
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
                 if (user == null)
                 {
                     return ApiResponse.Error("No user with such email was found");
@@ -307,10 +253,15 @@ namespace Infrastructure.Repositories
                 user.FirstName = request.FirstName;
                 user.LastName = request.LastName;
 
+                DateOnly now = DateOnly.FromDateTime(DateTime.Now);
+                if (now < request.Birthday)
+                    return ApiResponse.Error("Invalid birthday.");
+
                 // casting to date time because efcore gave error for dateonly field in
                 // creating datebase and in in User.cs we coverted it back to dateonly
                 // with [Column(TypeName = "Date")]
                 user.Birthday = request.Birthday.ToDateTime(TimeOnly.Parse("10:00 PM"));
+                
 
                 if (user.UserName != request.UserName)
                 {
@@ -332,50 +283,54 @@ namespace Infrastructure.Repositories
 
         }
 
-        public async Task<ApiResponse> UploadImage([FromForm] IFormFile image, string JwtToken)
+        public async Task<ApiResponse> UploadImage([FromForm] IFormFile image, Guid userId)
         {
             try
             {
-                var secretKey = _configuration.GetSection("AppSettings:SecretKey").Value!;
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(secretKey);
-                tokenHandler.ValidateToken(JwtToken, new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    // set clockskew to zero so tokens expire exactly at token expiration time
-                    // (instead of 5 minutes later)
-                    ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken);
+                //var secretKey = _configuration.GetSection("AppSettings:SecretKey").Value!;
+                //var tokenHandler = new JwtSecurityTokenHandler();
+                //var key = Encoding.ASCII.GetBytes(secretKey);
+                //tokenHandler.ValidateToken(JwtToken, new TokenValidationParameters
+                //{
+                //    ValidateIssuerSigningKey = true,
+                //    IssuerSigningKey = new SymmetricSecurityKey(key),
+                //    ValidateIssuer = false,
+                //    ValidateAudience = false,
+                //    // set clockskew to zero so tokens expire exactly at token expiration time
+                //    // (instead of 5 minutes later)
+                //    ClockSkew = TimeSpan.Zero
+                //}, out SecurityToken validatedToken);
 
-                var jwtToken = (JwtSecurityToken)validatedToken;
+                //var jwtToken = (JwtSecurityToken)validatedToken;
 
 
-                //extracting email from jwt token
+                ////extracting email from jwt token
 
-                /*use x.Type == claimPropertyName  
-                 * claimPropertyName ==
-                     * "unique_name" for username
-                     * "email" for email
-                     * "given_name" for givenName               
-                 * ""
-                */
-                var email = jwtToken.Claims.First(x => x.Type == "email").Value;
+                ///*use x.Type == claimPropertyName  
+                // * claimPropertyName ==
+                //     * "unique_name" for username
+                //     * "email" for email
+                //     * "given_name" for givenName               
+                // * ""
+                //*/
+                //var email = jwtToken.Claims.First(x => x.Type == "email").Value;
 
-                if (email == null)
-                {
-                    return ApiResponse.Error("invalid token");
-                }
+                //if (email == null)
+                //{
+                //    return ApiResponse.Error("invalid token");
+                //}
 
-                var user = await _db.Users.FirstOrDefaultAsync(u => u.Mail == email);
+                //var user = await _db.Users.FirstOrDefaultAsync(u => u.Mail == email);
+                //if (user == null)
+                //{
+                //    return ApiResponse.Error("No user with such email was found");
+                //}
+
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
                 if (user == null)
                 {
-                    return ApiResponse.Error("No user with such email was found");
+                    return ApiResponse.Error("user not found");
                 }
-
-
 
                 if (image == null || image.Length == 0)
                     return ApiResponse.Error("File is null or empty");

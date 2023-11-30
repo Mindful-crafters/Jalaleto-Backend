@@ -12,6 +12,5 @@ namespace Application.ViewModel
         public string LastName { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;
         public DateOnly Birthday { get; set; }
-        public string JwtToken { get; set; } = string.Empty; // token that was generated when user logged in
     }
 }
