@@ -1,6 +1,7 @@
 ﻿using Application;
 using Application.RepositoryInterfaces;
 using Application.ViewModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
@@ -58,22 +59,40 @@ namespace WebAPI.Controllers
 
         }
         [HttpGet]
+        [Authorize]
         [Route("ProfileInfo")]
-        public async Task<ApiResponse> ProfileInfo(string JwtToken)
+        public async Task<ApiResponse> ProfileInfo()
         {
-            return await _userRepository.ProfileInfo(JwtToken);
+            string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
+            if (string.IsNullOrWhiteSpace(UserIdString))
+            {
+                return ApiResponse.Unauthorized();
+            }
+            return await _userRepository.ProfileInfo(Guid.Parse(UserIdString));
         }
         [HttpPost]
+        [Authorize]
         [Route("EditProfile")]
         public async Task<ApiResponse> EditProfileInfo(EditProfileInfoRequestModel request)
         {
-            return await _userRepository.EditProfileInfo(request);
+            string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
+            if (string.IsNullOrWhiteSpace(UserIdString))
+            {
+                return ApiResponse.Unauthorized();
+            }
+            return await _userRepository.EditProfileInfo(request, Guid.Parse(UserIdString));
         }
         [HttpPost]
+        [Authorize]
         [Route("UploadImage")]
-        public async Task<ApiResponse> UploadImage(IFormFile file, string JwtToken)
+        public async Task<ApiResponse> UploadImage(IFormFile file)
         {
-            return await _userRepository.UploadImage(file, JwtToken);
+            string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
+            if (string.IsNullOrWhiteSpace(UserIdString))
+            {
+                return ApiResponse.Unauthorized();
+            }
+            return await _userRepository.UploadImage(file, Guid.Parse(UserIdString));
         }
 
         

@@ -12,9 +12,9 @@ namespace Application.RepositoryInterfaces
         public Task<ApiResponse> SendRestPasswordEmail(SendVerifyEmailRequestModel request);
         public Task<ApiResponse> ResetPassword(ResetPasswordRequestModel request);
         public Task<ApiResponse> CheckEmail(SendVerifyEmailRequestModel request);
-        public Task<ApiResponse> ProfileInfo(string JwtToken);
-        public Task<ApiResponse> EditProfileInfo(EditProfileInfoRequestModel request);
-        public Task<ApiResponse> UploadImage(IFormFile request,string JwtToken);
+        public Task<ApiResponse> ProfileInfo(Guid UserId);
+        public Task<ApiResponse> EditProfileInfo(EditProfileInfoRequestModel request , Guid UserId);
+        public Task<ApiResponse> UploadImage(IFormFile request , Guid UserId);
         
     }
 }
