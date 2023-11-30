@@ -1,0 +1,43 @@
+Connected to smtp://jalaleto.ir:587/?starttls=always
+S: 220 WH1.home ESMTP MailEnable Service, Version: 10.46-- ready at 11/30/23 17:10:49
+C: EHLO Hanza
+S: 250-home [104.28.247.11], this server offers 5 extensions
+S: 250-AUTH LOGIN
+S: 250-SIZE 40960000
+S: 250-HELP
+S: 250-AUTH=LOGIN
+S: 250 STARTTLS
+C: STARTTLS
+S: 220 Ready to start TLS
+C: EHLO Hanza
+S: 250-home [104.28.247.11], this server offers 5 extensions
+S: 250-AUTH LOGIN
+S: 250-SIZE 40960000
+S: 250-HELP
+S: 250-AUTH=LOGIN
+S: 250 CLIENTID
+C: AUTH LOGIN
+S: 334 VXNlcm5hbWU6
+C: ********
+S: 334 UGFzc3dvcmQ6
+C: ********
+S: 235 Authenticated
+C: MAIL FROM:<support@jalaleto.ir> SIZE=268
+S: 250 Requested mail action okay, completed
+C: RCPT TO:<prsmgh@gmail.com>
+S: 250 Requested mail action okay, completed
+C: DATA
+S: 354 Start mail input; end with <CRLF>.<CRLF>
+C: From: support@jalaleto.ir
+C: Date: Thu, 30 Nov 2023 17:10:47 +0330
+C: Subject: =?utf-8?b?2qnYryDYqtin24zbjNivINis2YTYp9mE2KrZiA==?=
+C: Message-Id: <0OGDMMG3NLU4.C0UGI0NJOOFO1@hanza>
+C: To: prsmgh@gmail.com
+C: MIME-Version: 1.0
+C: Content-Type: text/html; charset=utf-8
+C: 
+C: 235082
+C: .
+S: 250 Requested mail action okay, completed
+C: QUIT
+S: 221 Service closing TLS SSL transmission session
