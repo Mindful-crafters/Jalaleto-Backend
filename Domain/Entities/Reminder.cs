@@ -6,11 +6,31 @@ namespace Domain.Entities
 {
     public class Reminder
     {
+        public Reminder()
+        {
+            
+        }
+        public Reminder(string title, DateTime dateTime, int daysBeforeToRemind, bool remindByEmail,
+                        RepeatInterval repeatInterval, PriorityLevel priorityLevel, string notes, ReminderStatus status, Guid userId)
+        {
+            Title = title;
+            DateTime = dateTime;
+            CreationTimestamp = DateTime.Now;
+            LastModificationTimestamp = DateTime.Now;
+            DaysBeforeToRemind = daysBeforeToRemind;
+            RemindByEmail = remindByEmail;
+            RepeatInterval = repeatInterval;
+            PriorityLevel = priorityLevel;
+            Notes = notes;
+            Status = status;
+            UserId = userId;
+        }
+
         [Key]
         public int ReminderId { get; set; }
 
         [Required]
-        public required string Title { get; set; }
+        public string Title { get; set; }
 
         [Required]
         public DateTime DateTime { get; set; }
