@@ -24,6 +24,15 @@
                 Message = msg,
             };
         }
+        public static ApiResponse Unauthorized()
+        {
+            return new ApiResponse()
+            {
+                Success = false,
+                Code = 401,
+                Message = "Unauthorized",
+            };
+        }
 
     }
 }
