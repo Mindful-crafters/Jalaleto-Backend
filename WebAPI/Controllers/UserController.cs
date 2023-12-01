@@ -58,7 +58,7 @@ namespace WebAPI.Controllers
             return await _userRepository.CheckEmail(request);
 
         }
-        [HttpGet]
+        [HttpPost]
         [Authorize]
         [Route("ProfileInfo")]
         public async Task<ApiResponse> ProfileInfo()

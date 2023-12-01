@@ -1,8 +1,10 @@
 ﻿using Application;
+using Application.EntityModels;
 using Application.RepositoryInterfaces;
 using Application.ViewModel;
 using Domain.Entities;
 using Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Repositories
@@ -35,6 +37,23 @@ namespace Infrastructure.Repositories
             }
 
 
+        }
+
+        public async Task<ApiResponse> ReminderInfo(Guid userId)
+        {
+            var reminders = await _db.Reminders.Where(r=> r.UserId == userId).ToListAsync();
+            if (reminders == null)
+            {
+                return ApiResponse.Error("user not found");
+            }
+            List<ReminderInfo> rem = new List<ReminderInfo>();
+            foreach (var item in reminders)
+            {
+                ReminderInfo info = new ReminderInfo(item.ReminderId, item.Title, item.DateTime,
+                    item.RepeatInterval, item.PriorityLevel, item.Notes, item.Status);
+                rem.Add(info);
+            }
+            return new ReminderInfoResponseModel(rem);
         }
     }
 }

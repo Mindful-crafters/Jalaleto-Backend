@@ -1,0 +1,32 @@
+﻿using Domain.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Application.EntityModels
+{
+    public class ReminderInfo
+    {
+        public int ReminderId { get; set; }
+        public string Title { get; set; }
+        public DateTime DateTime { get; set; }
+        public RepeatInterval RepeatInterval { get; set; }
+        public PriorityLevel PriorityLevel { get; set; }
+        public string? Notes { get; set; }
+        public ReminderStatus Status { get; set; }
+
+        public ReminderInfo(int reminderId, string title, DateTime dateTime,
+                         RepeatInterval interval, PriorityLevel priority, string notes, ReminderStatus status)
+        {
+            this.ReminderId = reminderId;
+            this.Title = title;
+            this.DateTime = dateTime;
+            this.RepeatInterval = interval;
+            this.PriorityLevel = priority;
+            this.Notes = notes;
+            this.Status = status;
+        }
+    }
+}

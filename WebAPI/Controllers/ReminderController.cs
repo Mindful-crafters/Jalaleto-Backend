@@ -29,5 +29,18 @@ namespace WebAPI.Controllers
 
             return await _reminderRepository.CreateReminder(request, Guid.Parse(UserIdString));
         }
+        [HttpPost]
+        [Authorize]
+        [Route("Info")]
+        public async Task<ApiResponse> ReminderInfo()
+        {
+            string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
+            if (string.IsNullOrWhiteSpace(UserIdString))
+            {
+                return ApiResponse.Unauthorized();
+            }
+
+            return await _reminderRepository.ReminderInfo(Guid.Parse(UserIdString));
+        }
     }
 }
