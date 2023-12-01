@@ -32,7 +32,7 @@ namespace WebAPI.Controllers
         [HttpPost]
         [Authorize]
         [Route("Info")]
-        public async Task<ApiResponse> ReminderInfo()
+        public async Task<ApiResponse> ReminderInfo(ReminderInfoRequestModel request)
         {
             string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
             if (string.IsNullOrWhiteSpace(UserIdString))
@@ -40,7 +40,7 @@ namespace WebAPI.Controllers
                 return ApiResponse.Unauthorized();
             }
 
-            return await _reminderRepository.ReminderInfo(Guid.Parse(UserIdString));
+            return await _reminderRepository.ReminderInfo(request, Guid.Parse(UserIdString));
         }
     }
 }

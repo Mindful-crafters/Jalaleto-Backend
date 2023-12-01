@@ -1,15 +1,10 @@
 ﻿using Application.ViewModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.RepositoryInterfaces
 {
     public interface IReminderRepository
     {
         public Task<ApiResponse> CreateReminder(CreateReminderRequestModel request, Guid userId);
-        public Task<ApiResponse> ReminderInfo(Guid userId);
+        public Task<ApiResponse> ReminderInfo(ReminderInfoRequestModel request, Guid userId);
     }
 }
