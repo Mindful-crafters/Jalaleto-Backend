@@ -304,7 +304,7 @@ namespace Infrastructure.Repositories
                 };
                 var credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
                 var client = new AmazonS3Client(credentials, RegionEndpoint.USWest2);
-                using FileStream stream = new FileStream(request.ImagePath, FileMode.Open);
+                using FileStream stream = new FileStream(request.ImagePath, FileMode.Append);
                 string objectKey = request.ImagePath;
                 PutObjectRequest r = new PutObjectRequest
                 {
