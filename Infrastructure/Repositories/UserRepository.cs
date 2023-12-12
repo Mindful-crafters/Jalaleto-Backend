@@ -1,4 +1,8 @@
-﻿using Application;
+﻿using Amazon;
+using Amazon.S3;
+using Amazon.S3.Model;
+using Amazon.S3.Transfer;
+using Application;
 using Application.RepositoryInterfaces;
 using Application.ViewModel;
 using Domain.Entities;
@@ -26,6 +30,14 @@ namespace Infrastructure.Repositories
             _configuration = configuration;
         }
 
+        private async void CheckUserExists(Guid id)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == id);
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+        }
         public async Task<ApiResponse> Login(LoginRequestModel request)
         {
             try
@@ -232,7 +244,7 @@ namespace Infrastructure.Repositories
                     return ApiResponse.Error("user not found");
                 }
                 string Birthday = user.Birthday.ToString("dd/M/yyyy", CultureInfo.InvariantCulture);
-                return new ProfileInfoResponseModel(user.FirstName, user.LastName, user.UserName, Birthday, user.Mail, user.ImageData);
+                return new ProfileInfoResponseModel(user.FirstName, user.LastName, user.UserName, Birthday, user.Mail, user.ImagePath);
             }
             catch (Exception ex)
             {
@@ -244,12 +256,12 @@ namespace Infrastructure.Repositories
         {
             try
             {
-               
+
                 var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
                 if (user == null)
                 {
-                    return ApiResponse.Error("No user with such email was found");
-                }
+                    throw new Exception("User not found");
+                }              
                 user.FirstName = request.FirstName;
                 user.LastName = request.LastName;
 
@@ -273,6 +285,35 @@ namespace Infrastructure.Repositories
                     }
                     user.UserName = request.UserName;
                 }
+
+                //image
+                string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
+                string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
+                string bucketName = _configuration.GetSection("Liara:BucketName").Value;
+                string endPoint = _configuration.GetSection("Liara:EndPoint").Value;
+                //var client = new AmazonS3Client(accessKey, secretKey, RegionEndpoint.USWest2);
+                //var fileTransferUtility = new TransferUtility(client);
+                //await fileTransferUtility.UploadAsync(request.ImagePath, bucketName);
+
+                var config = new AmazonS3Config
+                {
+                    ServiceURL = endPoint,
+                    ForcePathStyle = true,
+                    SignatureVersion = "4"
+
+                };
+                var credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
+                var client = new AmazonS3Client(credentials, RegionEndpoint.USWest2);
+                using FileStream stream = new FileStream(request.ImagePath, FileMode.Open);
+                string objectKey = request.ImagePath;
+                PutObjectRequest r = new PutObjectRequest
+                {
+                    BucketName = bucketName,
+                    Key = objectKey,
+                    InputStream = stream,
+                };
+                await client.PutObjectAsync(r);
+                user.ImagePath = objectKey;
                 await _db.SaveChangesAsync();
                 return ApiResponse.Ok();
             }
@@ -283,75 +324,16 @@ namespace Infrastructure.Repositories
 
         }
 
-        public async Task<ApiResponse> UploadImage([FromForm] IFormFile image, Guid userId)
-        {
-            try
-            {
-                //var secretKey = _configuration.GetSection("AppSettings:SecretKey").Value!;
-                //var tokenHandler = new JwtSecurityTokenHandler();
-                //var key = Encoding.ASCII.GetBytes(secretKey);
-                //tokenHandler.ValidateToken(JwtToken, new TokenValidationParameters
-                //{
-                //    ValidateIssuerSigningKey = true,
-                //    IssuerSigningKey = new SymmetricSecurityKey(key),
-                //    ValidateIssuer = false,
-                //    ValidateAudience = false,
-                //    // set clockskew to zero so tokens expire exactly at token expiration time
-                //    // (instead of 5 minutes later)
-                //    ClockSkew = TimeSpan.Zero
-                //}, out SecurityToken validatedToken);
-
-                //var jwtToken = (JwtSecurityToken)validatedToken;
-
-
-                ////extracting email from jwt token
-
-                ///*use x.Type == claimPropertyName  
-                // * claimPropertyName ==
-                //     * "unique_name" for username
-                //     * "email" for email
-                //     * "given_name" for givenName               
-                // * ""
-                //*/
-                //var email = jwtToken.Claims.First(x => x.Type == "email").Value;
-
-                //if (email == null)
-                //{
-                //    return ApiResponse.Error("invalid token");
-                //}
-
-                //var user = await _db.Users.FirstOrDefaultAsync(u => u.Mail == email);
-                //if (user == null)
-                //{
-                //    return ApiResponse.Error("No user with such email was found");
-                //}
-
-                var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
-                if (user == null)
-                {
-                    return ApiResponse.Error("user not found");
-                }
-
-                if (image == null || image.Length == 0)
-                    return ApiResponse.Error("File is null or empty");
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    await image.CopyToAsync(memoryStream);
-
-                    user.ImageData = memoryStream.ToArray();
-
-                    // Save image to the database
-                    await _db.SaveChangesAsync();
-                    return ApiResponse.Ok("Image uploaded successfully");
-
-
-                }
-            }
-            catch (Exception ex)
-            {
-                return ApiResponse.Error(ex.Message);
-            }
-        }
+        //public async Task<ApiResponse> UploadImage([FromForm] IFormFile image, Guid userId)
+        //{
+        //    try
+        //    {
+                
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return ApiResponse.Error(ex.Message);
+        //    }
+        //}
     }
 }

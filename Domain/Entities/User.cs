@@ -9,7 +9,8 @@ namespace Domain.Entities
         {
 
         }
-        public User(string firstname, string lastname, string username, byte[] passwordHash, byte[] passwordSalt, string mail, DateOnly birthday)
+        public User(string firstname, string lastname, string username, byte[] passwordHash, byte[] passwordSalt, 
+            string mail, DateOnly birthday)
         {
             FirstName = firstname;
             LastName = lastname;
@@ -18,7 +19,7 @@ namespace Domain.Entities
             PasswordSalt = passwordSalt;
             Mail = mail;
             Birthday = birthday.ToDateTime(TimeOnly.Parse("10:00 PM"));
-            ImageData = new byte[byte.MaxValue];    
+            
         }
         public Guid Id { get; set; }
         public string Mail { get; set; }
@@ -30,7 +31,7 @@ namespace Domain.Entities
         public byte[] PasswordHash { get; set; } = new byte[32];
         public byte[] PasswordSalt { get; set; } = new byte[32];
         public DateTime CreatedTime { get; set; } = DateTime.Now;
-        public byte[] ImageData { get; set; } 
+        public string ImagePath { get; set; } = string.Empty;
 
     }
 }
