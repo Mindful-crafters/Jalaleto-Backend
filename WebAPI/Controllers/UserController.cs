@@ -82,19 +82,20 @@ namespace WebAPI.Controllers
             }
             return await _userRepository.EditProfileInfo(request, Guid.Parse(UserIdString));
         }
-        [HttpPost]
-        [Authorize]
-        [Route("UploadImage")]
-        public async Task<ApiResponse> UploadImage(IFormFile file)
-        {
-            string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
-            if (string.IsNullOrWhiteSpace(UserIdString))
-            {
-                return ApiResponse.Unauthorized();
-            }
-            return await _userRepository.UploadImage(file, Guid.Parse(UserIdString));
-        }
+       
+        //[HttpPost]
+        //[Authorize]
+        //[Route("UploadImage")]
+        //public async Task<ApiResponse> UploadImage(IFormFile file)
+        //{
+        //    string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
+        //    if (string.IsNullOrWhiteSpace(UserIdString))
+        //    {
+        //        return ApiResponse.Unauthorized();
+        //    }
+        //    return await _userRepository.UploadImage(file, Guid.Parse(UserIdString));
+        //}
 
-        
+
     }
 }

@@ -14,9 +14,9 @@ namespace Application.ViewModel
         public string UserName { get; set; } = string.Empty;
         public string Birthday { get; set; }
         public string Email { get; set; }
-        public byte[] Image { get; set; }
+        public string ImagePath { get; set; }
 
-        public ProfileInfoResponseModel(string FirstName, string LastName, string Username, string birthday, string email, byte[] image)
+        public ProfileInfoResponseModel(string FirstName, string LastName, string Username, string birthday, string email, string imagePath)
         {
             this.Success = true;
             this.Code = 200;
@@ -26,7 +26,7 @@ namespace Application.ViewModel
             this.UserName = Username;
             this.Birthday = birthday;
             this.Email = email;
-            this.Image = image;
+            this.ImagePath = imagePath;
         }
     }
 }

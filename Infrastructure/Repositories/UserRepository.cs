@@ -1,4 +1,9 @@
-﻿using Application;
+﻿using Amazon;
+using Amazon.Runtime;
+using Amazon.S3;
+using Amazon.S3.Model;
+using Amazon.S3.Transfer;
+using Application;
 using Application.RepositoryInterfaces;
 using Application.ViewModel;
 using Domain.Entities;
@@ -10,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
+using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
 
@@ -26,6 +32,14 @@ namespace Infrastructure.Repositories
             _configuration = configuration;
         }
 
+        private async void CheckUserExists(Guid id)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == id);
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+        }
         public async Task<ApiResponse> Login(LoginRequestModel request)
         {
             try
@@ -232,7 +246,40 @@ namespace Infrastructure.Repositories
                     return ApiResponse.Error("user not found");
                 }
                 string Birthday = user.Birthday.ToString("dd/M/yyyy", CultureInfo.InvariantCulture);
-                return new ProfileInfoResponseModel(user.FirstName, user.LastName, user.UserName, Birthday, user.Mail, user.ImageData);
+
+
+                string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
+                string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
+                string bucketName = _configuration.GetSection("Liara:BucketName").Value;
+                string endPoint = _configuration.GetSection("Liara:EndPoint").Value;
+                string outpath = "";
+                ListObjectsV2Request r = new ListObjectsV2Request
+                {
+                    BucketName = bucketName
+                };
+                var credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
+                var config = new AmazonS3Config
+                {
+                    ServiceURL = endPoint,
+                    ForcePathStyle = true
+                };
+                using var client = new AmazonS3Client(credentials, config);
+                ListObjectsV2Response response = await client.ListObjectsV2Async(r);
+                foreach (S3Object entry in response.S3Objects)
+                {
+                    if (entry.Key == user.ImagePath)
+                    {
+                        GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
+                        {
+                            BucketName = bucketName,
+                            Key = entry.Key,
+                            Expires = DateTime.Now.AddHours(1)
+                        };
+                        outpath = client.GetPreSignedURL(urlRequest);
+                    }
+                }
+                
+                return new ProfileInfoResponseModel(user.FirstName, user.LastName, user.UserName, Birthday, user.Mail, outpath);
             }
             catch (Exception ex)
             {
@@ -244,12 +291,12 @@ namespace Infrastructure.Repositories
         {
             try
             {
-               
+
                 var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
                 if (user == null)
                 {
-                    return ApiResponse.Error("No user with such email was found");
-                }
+                    throw new Exception("User not found");
+                }              
                 user.FirstName = request.FirstName;
                 user.LastName = request.LastName;
 
@@ -261,7 +308,7 @@ namespace Infrastructure.Repositories
                 // creating datebase and in in User.cs we coverted it back to dateonly
                 // with [Column(TypeName = "Date")]
                 user.Birthday = request.Birthday.ToDateTime(TimeOnly.Parse("10:00 PM"));
-                
+               
 
                 if (user.UserName != request.UserName)
                 {
@@ -273,6 +320,35 @@ namespace Infrastructure.Repositories
                     }
                     user.UserName = request.UserName;
                 }
+
+                //image
+                string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
+                string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
+                string bucketName = _configuration.GetSection("Liara:BucketName").Value;
+                string endPoint = _configuration.GetSection("Liara:EndPoint").Value;
+               
+                string filePath = request.ImagePath;
+
+                var credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
+                var config = new AmazonS3Config
+                {
+                    ServiceURL = endPoint,
+                    ForcePathStyle = true 
+                };
+                using var client = new AmazonS3Client(credentials, config);
+                using var fileTransferUtility = new TransferUtility(client);
+                string[] type = request.ImagePath.Split('.');
+                string newFileName = user.UserName + "-Image."+ type[type.Length-1];
+                var fileTransferUtilityRequest = new TransferUtilityUploadRequest
+                {
+                    BucketName = bucketName,
+                    FilePath = filePath,
+                    Key = newFileName 
+                };
+                await fileTransferUtility.UploadAsync(fileTransferUtilityRequest);
+
+                //saving image's name in bucket to database(user row)
+                user.ImagePath = newFileName;
                 await _db.SaveChangesAsync();
                 return ApiResponse.Ok();
             }
@@ -283,75 +359,16 @@ namespace Infrastructure.Repositories
 
         }
 
-        public async Task<ApiResponse> UploadImage([FromForm] IFormFile image, Guid userId)
-        {
-            try
-            {
-                //var secretKey = _configuration.GetSection("AppSettings:SecretKey").Value!;
-                //var tokenHandler = new JwtSecurityTokenHandler();
-                //var key = Encoding.ASCII.GetBytes(secretKey);
-                //tokenHandler.ValidateToken(JwtToken, new TokenValidationParameters
-                //{
-                //    ValidateIssuerSigningKey = true,
-                //    IssuerSigningKey = new SymmetricSecurityKey(key),
-                //    ValidateIssuer = false,
-                //    ValidateAudience = false,
-                //    // set clockskew to zero so tokens expire exactly at token expiration time
-                //    // (instead of 5 minutes later)
-                //    ClockSkew = TimeSpan.Zero
-                //}, out SecurityToken validatedToken);
-
-                //var jwtToken = (JwtSecurityToken)validatedToken;
-
-
-                ////extracting email from jwt token
-
-                ///*use x.Type == claimPropertyName  
-                // * claimPropertyName ==
-                //     * "unique_name" for username
-                //     * "email" for email
-                //     * "given_name" for givenName               
-                // * ""
-                //*/
-                //var email = jwtToken.Claims.First(x => x.Type == "email").Value;
-
-                //if (email == null)
-                //{
-                //    return ApiResponse.Error("invalid token");
-                //}
-
-                //var user = await _db.Users.FirstOrDefaultAsync(u => u.Mail == email);
-                //if (user == null)
-                //{
-                //    return ApiResponse.Error("No user with such email was found");
-                //}
-
-                var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
-                if (user == null)
-                {
-                    return ApiResponse.Error("user not found");
-                }
-
-                if (image == null || image.Length == 0)
-                    return ApiResponse.Error("File is null or empty");
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    await image.CopyToAsync(memoryStream);
-
-                    user.ImageData = memoryStream.ToArray();
-
-                    // Save image to the database
-                    await _db.SaveChangesAsync();
-                    return ApiResponse.Ok("Image uploaded successfully");
-
-
-                }
-            }
-            catch (Exception ex)
-            {
-                return ApiResponse.Error(ex.Message);
-            }
-        }
+        //public async Task<ApiResponse> UploadImage([FromForm] IFormFile image, Guid userId)
+        //{
+        //    try
+        //    {
+                
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return ApiResponse.Error(ex.Message);
+        //    }
+        //}
     }
 }
