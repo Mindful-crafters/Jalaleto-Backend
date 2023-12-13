@@ -328,7 +328,7 @@ namespace Infrastructure.Repositories
                 string endPoint = _configuration.GetSection("Liara:EndPoint").Value;
                
                 string filePath = request.ImagePath;
-
+               
                 var credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
                 var config = new AmazonS3Config
                 {
