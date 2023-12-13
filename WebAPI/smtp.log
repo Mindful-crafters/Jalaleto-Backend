@@ -84,3 +84,89 @@ C: .
 S: 250 Requested mail action okay, completed
 C: QUIT
 S: 221 Service closing TLS SSL transmission session
+Connected to smtp://jalaleto.ir:587/?starttls=always
+S: 220 WH1.home ESMTP MailEnable Service, Version: 10.46-- ready at 12/13/23 14:01:50
+C: EHLO DESKTOP-D7RMKD4
+S: 250-home [194.225.232.41], this server offers 5 extensions
+S: 250-AUTH LOGIN
+S: 250-SIZE 40960000
+S: 250-HELP
+S: 250-AUTH=LOGIN
+S: 250 STARTTLS
+C: STARTTLS
+S: 220 Ready to start TLS
+C: EHLO DESKTOP-D7RMKD4
+S: 250-home [194.225.232.41], this server offers 5 extensions
+S: 250-AUTH LOGIN
+S: 250-SIZE 40960000
+S: 250-HELP
+S: 250-AUTH=LOGIN
+S: 250 CLIENTID
+C: AUTH LOGIN
+S: 334 VXNlcm5hbWU6
+C: ********
+S: 334 UGFzc3dvcmQ6
+C: ********
+S: 235 Authenticated
+C: MAIL FROM:<support@jalaleto.ir> SIZE=286
+S: 250 Requested mail action okay, completed
+C: RCPT TO:<m.rezatajikmmm@gmail.com>
+S: 250 Requested mail action okay, completed
+C: DATA
+S: 354 Start mail input; end with <CRLF>.<CRLF>
+C: From: support@jalaleto.ir
+C: Date: Wed, 13 Dec 2023 14:01:49 +0330
+C: Subject: =?utf-8?b?2qnYryDYqtin24zbjNivINis2YTYp9mE2KrZiA==?=
+C: Message-Id: <LC937GC1RLU4.YFZ6JW4OR5E81@desktop-d7rmkd4>
+C: To: m.rezatajikmmm@gmail.com
+C: MIME-Version: 1.0
+C: Content-Type: text/html; charset=utf-8
+C: 
+C: 738549
+C: .
+S: 250 Requested mail action okay, completed
+C: QUIT
+S: 221 Service closing TLS SSL transmission session
+Connected to smtp://jalaleto.ir:587/?starttls=always
+S: 220 WH1.home ESMTP MailEnable Service, Version: 10.46-- ready at 12/13/23 16:00:14
+C: EHLO DESKTOP-D7RMKD4
+S: 250-home [194.225.232.41], this server offers 5 extensions
+S: 250-AUTH LOGIN
+S: 250-SIZE 40960000
+S: 250-HELP
+S: 250-AUTH=LOGIN
+S: 250 STARTTLS
+C: STARTTLS
+S: 220 Ready to start TLS
+C: EHLO DESKTOP-D7RMKD4
+S: 250-home [194.225.232.41], this server offers 5 extensions
+S: 250-AUTH LOGIN
+S: 250-SIZE 40960000
+S: 250-HELP
+S: 250-AUTH=LOGIN
+S: 250 CLIENTID
+C: AUTH LOGIN
+S: 334 VXNlcm5hbWU6
+C: ********
+S: 334 UGFzc3dvcmQ6
+C: ********
+S: 235 Authenticated
+C: MAIL FROM:<support@jalaleto.ir> SIZE=281
+S: 250 Requested mail action okay, completed
+C: RCPT TO:<sajadmrjll@gmail.com>
+S: 250 Requested mail action okay, completed
+C: DATA
+S: 354 Start mail input; end with <CRLF>.<CRLF>
+C: From: support@jalaleto.ir
+C: Date: Wed, 13 Dec 2023 16:00:12 +0330
+C: Subject: =?utf-8?b?2qnYryDYqtin24zbjNivINis2YTYp9mE2KrZiA==?=
+C: Message-Id: <9THPX292RLU4.4HNMLR3OO3PE@desktop-d7rmkd4>
+C: To: sajadmrjll@gmail.com
+C: MIME-Version: 1.0
+C: Content-Type: text/html; charset=utf-8
+C: 
+C: 587564
+C: .
+S: 250 Requested mail action okay, completed
+C: QUIT
+S: 221 Service closing TLS SSL transmission session

@@ -1,4 +1,5 @@
 ﻿using Amazon;
+using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
@@ -14,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
+using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
 
@@ -244,7 +246,40 @@ namespace Infrastructure.Repositories
                     return ApiResponse.Error("user not found");
                 }
                 string Birthday = user.Birthday.ToString("dd/M/yyyy", CultureInfo.InvariantCulture);
-                return new ProfileInfoResponseModel(user.FirstName, user.LastName, user.UserName, Birthday, user.Mail, user.ImagePath);
+
+
+                string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
+                string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
+                string bucketName = _configuration.GetSection("Liara:BucketName").Value;
+                string endPoint = _configuration.GetSection("Liara:EndPoint").Value;
+                string outpath = "";
+                ListObjectsV2Request r = new ListObjectsV2Request
+                {
+                    BucketName = bucketName
+                };
+                var credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
+                var config = new AmazonS3Config
+                {
+                    ServiceURL = endPoint,
+                    ForcePathStyle = true
+                };
+                using var client = new AmazonS3Client(credentials, config);
+                ListObjectsV2Response response = await client.ListObjectsV2Async(r);
+                foreach (S3Object entry in response.S3Objects)
+                {
+                    if (entry.Key == user.ImagePath)
+                    {
+                        GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
+                        {
+                            BucketName = bucketName,
+                            Key = entry.Key,
+                            Expires = DateTime.Now.AddHours(1)
+                        };
+                        outpath = client.GetPreSignedURL(urlRequest);
+                    }
+                }
+                
+                return new ProfileInfoResponseModel(user.FirstName, user.LastName, user.UserName, Birthday, user.Mail, outpath);
             }
             catch (Exception ex)
             {
@@ -273,7 +308,7 @@ namespace Infrastructure.Repositories
                 // creating datebase and in in User.cs we coverted it back to dateonly
                 // with [Column(TypeName = "Date")]
                 user.Birthday = request.Birthday.ToDateTime(TimeOnly.Parse("10:00 PM"));
-                
+               
 
                 if (user.UserName != request.UserName)
                 {
@@ -291,29 +326,29 @@ namespace Infrastructure.Repositories
                 string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
                 string bucketName = _configuration.GetSection("Liara:BucketName").Value;
                 string endPoint = _configuration.GetSection("Liara:EndPoint").Value;
-                //var client = new AmazonS3Client(accessKey, secretKey, RegionEndpoint.USWest2);
-                //var fileTransferUtility = new TransferUtility(client);
-                //await fileTransferUtility.UploadAsync(request.ImagePath, bucketName);
+               
+                string filePath = request.ImagePath;
 
+                var credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
                 var config = new AmazonS3Config
                 {
                     ServiceURL = endPoint,
-                    ForcePathStyle = true,
-                    SignatureVersion = "4"
-
+                    ForcePathStyle = true 
                 };
-                var credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
-                var client = new AmazonS3Client(credentials, RegionEndpoint.USWest2);
-                using FileStream stream = new FileStream(request.ImagePath, FileMode.Append);
-                string objectKey = request.ImagePath;
-                PutObjectRequest r = new PutObjectRequest
+                using var client = new AmazonS3Client(credentials, config);
+                using var fileTransferUtility = new TransferUtility(client);
+                string[] type = request.ImagePath.Split('.');
+                string newFileName = user.UserName + "-Image."+ type[type.Length-1];
+                var fileTransferUtilityRequest = new TransferUtilityUploadRequest
                 {
                     BucketName = bucketName,
-                    Key = objectKey,
-                    InputStream = stream,
+                    FilePath = filePath,
+                    Key = newFileName 
                 };
-                await client.PutObjectAsync(r);
-                user.ImagePath = objectKey;
+                await fileTransferUtility.UploadAsync(fileTransferUtilityRequest);
+
+                //saving image's name in bucket to database(user row)
+                user.ImagePath = newFileName;
                 await _db.SaveChangesAsync();
                 return ApiResponse.Ok();
             }
