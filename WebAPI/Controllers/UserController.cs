@@ -72,8 +72,9 @@ namespace WebAPI.Controllers
         }
         [HttpPost]
         [Authorize]
+       // [Consumes("multipart/form-data")]
         [Route("EditProfile")]
-        public async Task<ApiResponse> EditProfileInfo(EditProfileInfoRequestModel request)
+        public async Task<ApiResponse> EditProfileInfo([FromForm] EditProfileInfoRequestModel request)
         {
             string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
             if (string.IsNullOrWhiteSpace(UserIdString))

@@ -287,7 +287,7 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task<ApiResponse> EditProfileInfo(EditProfileInfoRequestModel request, Guid userId)
+        public async Task<ApiResponse> EditProfileInfo([FromForm] EditProfileInfoRequestModel request, Guid userId)
         {
             try
             {
@@ -327,7 +327,7 @@ namespace Infrastructure.Repositories
                 string bucketName = _configuration.GetSection("Liara:BucketName").Value;
                 string endPoint = _configuration.GetSection("Liara:EndPoint").Value;
                
-                string filePath = request.ImagePath;
+                //string filePath = request.ImagePath;
                
                 var credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
                 var config = new AmazonS3Config
@@ -336,13 +336,15 @@ namespace Infrastructure.Repositories
                     ForcePathStyle = true 
                 };
                 using var client = new AmazonS3Client(credentials, config);
+                using var memoryStream = new MemoryStream();
+                await request.image.CopyToAsync(memoryStream);
                 using var fileTransferUtility = new TransferUtility(client);
-                string[] type = request.ImagePath.Split('.');
-                string newFileName = user.UserName + "-Image."+ type[type.Length-1];
+               // string[] type = request.ImagePath.Split('.');
+                string newFileName = user.Id + "-Image." + request.image.FileName;
                 var fileTransferUtilityRequest = new TransferUtilityUploadRequest
                 {
                     BucketName = bucketName,
-                    FilePath = filePath,
+                    InputStream = memoryStream,
                     Key = newFileName 
                 };
                 await fileTransferUtility.UploadAsync(fileTransferUtilityRequest);
