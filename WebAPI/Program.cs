@@ -63,7 +63,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IReminderRepository, ReminderRepository>();
-
+builder.Services.AddScoped<IGroupRepository, GroupRepository>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
