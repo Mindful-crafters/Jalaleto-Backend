@@ -9,19 +9,7 @@ namespace Infrastructure.Migrations
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<string>(
-                name: "Description",
-                table: "Groups",
-                type: "nvarchar(max)",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "ImagePath",
-                table: "Groups",
-                type: "nvarchar(max)",
-                nullable: true);
-
+        {           
             migrationBuilder.AddColumn<string>(
                 name: "Mail",
                 table: "GroupMembers",
@@ -32,14 +20,7 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Description",
-                table: "Groups");
-
-            migrationBuilder.DropColumn(
-                name: "ImagePath",
-                table: "Groups");
-
+            
             migrationBuilder.DropColumn(
                 name: "Mail",
                 table: "GroupMembers");
