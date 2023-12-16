@@ -312,10 +312,12 @@ namespace Infrastructure.Repositories
 
                 if (user.UserName != request.UserName)
                 {
+                    string tmp = user.UserName;
                     user.UserName = "WaitedToBeChanged"; // check other usernames except it self
                     await _db.SaveChangesAsync();
                     if (_db.Users.Any(u => u.UserName == request.UserName))
                     {
+                        user.UserName = tmp;
                         return ApiResponse.Error("User already exists.");
                     }
                     user.UserName = request.UserName;
