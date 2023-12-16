@@ -50,7 +50,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Groups2");
+                    b.ToTable("Groups");
                 });
 
             modelBuilder.Entity("Domain.Entities.GroupMembers", b =>
@@ -73,7 +73,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("GroupMembers2");
+                    b.ToTable("GroupMembers");
                 });
 
             modelBuilder.Entity("Domain.Entities.Reminder", b =>

@@ -5,35 +5,44 @@
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class finalgroup2 : Migration
+    public partial class xx : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "GroupId",
+            migrationBuilder.AddColumn<string>(
+                name: "Description",
                 table: "Groups",
-                newName: "Id");
+                type: "nvarchar(max)",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "ImagePath",
+                table: "Groups",
+                type: "nvarchar(max)",
+                nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "Mail",
                 table: "GroupMembers",
                 type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "");
+                nullable: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
+                name: "Description",
+                table: "Groups");
+
+            migrationBuilder.DropColumn(
+                name: "ImagePath",
+                table: "Groups");
+
+            migrationBuilder.DropColumn(
                 name: "Mail",
                 table: "GroupMembers");
-
-            migrationBuilder.RenameColumn(
-                name: "Id",
-                table: "Groups",
-                newName: "GroupId");
         }
     }
 }

@@ -33,8 +33,8 @@ namespace Infrastructure.Repositories
                 Domain.Entities.Group g = new Domain.Entities.Group(request.Name, userId, request.Description);
                 await _db.AddAsync(g);
                 await _db.SaveChangesAsync();
-                var GroupFromDb = _db.Groups2.FirstOrDefault(gp => gp.Name == request.Name && gp.Owner == userId);
-                GroupMembers member = new GroupMembers(GroupFromDb.Id, userId, user.Mail);
+                var GroupFromDb = _db.Groups.FirstOrDefault(gp => gp.Name == request.Name && gp.Owner == userId);
+                GroupMembers member = new GroupMembers(GroupFromDb.GroupId, userId, user.Mail);
                 //image
                 string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
                 string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
@@ -52,7 +52,7 @@ namespace Infrastructure.Repositories
                 await request.Image.CopyToAsync(memoryStream);
                 using var fileTransferUtility = new TransferUtility(client);
 
-                string newFileName = GroupFromDb.Id + "-" + GroupFromDb.Name + "-Image." + request.Image.FileName;
+                string newFileName = GroupFromDb.GroupId + "-" + GroupFromDb.Name + "-Image." + request.Image.FileName;
                 var fileTransferUtilityRequest = new TransferUtilityUploadRequest
                 {
                     BucketName = bucketName,

@@ -7,7 +7,7 @@ namespace Domain.Entities
     {
         [Required]
         [Key]
-        public int Id { get; set; }
+        public int GroupId { get; set; }
         [Required]
         public string Name { get; set; }
         [Required]
