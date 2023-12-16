@@ -8,8 +8,8 @@ namespace Infrastructure
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Reminder> Reminders { get; set; }
-        public DbSet<Group> Groups { get; set; }
-        public DbSet<GroupMembers> GroupMembers { get; set; }
+        public DbSet<Group> Groups2 { get; set; }
+        public DbSet<GroupMembers> GroupMembers2 { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
 

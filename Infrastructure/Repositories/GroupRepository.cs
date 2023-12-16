@@ -33,7 +33,7 @@ namespace Infrastructure.Repositories
                 Domain.Entities.Group g = new Domain.Entities.Group(request.Name, userId, request.Description);
                 await _db.AddAsync(g);
                 await _db.SaveChangesAsync();
-                var GroupFromDb = _db.Groups.FirstOrDefault(gp => gp.Name == request.Name && gp.Owner == userId);
+                var GroupFromDb = _db.Groups2.FirstOrDefault(gp => gp.Name == request.Name && gp.Owner == userId);
                 GroupMembers member = new GroupMembers(GroupFromDb.Id, userId, user.Mail);
                 //image
                 string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
