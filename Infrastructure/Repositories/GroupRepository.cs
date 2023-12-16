@@ -31,7 +31,10 @@ namespace Infrastructure.Repositories
                     return ApiResponse.Error("user not found");
                 }
                 Domain.Entities.Group g = new Domain.Entities.Group(request.Name, userId, request.Description);
-                GroupMembers member = new GroupMembers(g.GroupId, userId);
+                await _db.AddAsync(g);
+                await _db.SaveChangesAsync();
+                var GroupFromDb = _db.Groups.FirstOrDefault(gp => gp.Name == request.Name && gp.Owner == userId);
+                GroupMembers member = new GroupMembers(GroupFromDb.Id, userId, user.Mail);
                 //image
                 string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
                 string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
@@ -49,7 +52,7 @@ namespace Infrastructure.Repositories
                 await request.Image.CopyToAsync(memoryStream);
                 using var fileTransferUtility = new TransferUtility(client);
 
-                string newFileName = g.GroupId + "-" + g.Name + "-Image." + request.Image.FileName;
+                string newFileName = GroupFromDb.Id + "-" + GroupFromDb.Name + "-Image." + request.Image.FileName;
                 var fileTransferUtilityRequest = new TransferUtilityUploadRequest
                 {
                     BucketName = bucketName,
@@ -59,8 +62,8 @@ namespace Infrastructure.Repositories
                 await fileTransferUtility.UploadAsync(fileTransferUtilityRequest);
 
                 //saving image's name in bucket to database(user row)
-                g.ImagePath = newFileName;
-                await _db.AddAsync(g);
+                GroupFromDb.ImagePath = newFileName;
+               // await _db.AddAsync(g);          
                 await _db.AddAsync(member);
                 await _db.SaveChangesAsync();
                 return ApiResponse.Ok();
