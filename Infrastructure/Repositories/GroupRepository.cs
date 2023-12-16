@@ -1,6 +1,8 @@
 ﻿using Amazon.S3;
+using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using Application;
+using Application.EntityModels;
 using Application.RepositoryInterfaces;
 using Application.ViewModel;
 using Domain.Entities;
@@ -74,5 +76,68 @@ namespace Infrastructure.Repositories
             }
         }
 
+        public async Task<ApiResponse> GroupInfo(Guid userId)
+        {
+            try
+            {
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                if (user == null)
+                {
+                    return ApiResponse.Error("user not found");
+                }
+                List<GroupInfo> groups = new List<GroupInfo>();
+                var userGroups = await _db.GroupMembers.Where(x => x.UserId == userId).ToListAsync();
+                List<Domain.Entities.Group> userGroupsWithInfo = new List<Domain.Entities.Group>();
+                string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
+                string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
+                string bucketName = _configuration.GetSection("Liara:BucketName").Value;
+                string endPoint = _configuration.GetSection("Liara:EndPoint").Value;
+                
+                ListObjectsV2Request r = new ListObjectsV2Request
+                {
+                    BucketName = bucketName
+                };
+                var credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
+                var config = new AmazonS3Config
+                {
+                    ServiceURL = endPoint,
+                    ForcePathStyle = true
+                };
+                using var client = new AmazonS3Client(credentials, config);
+                ListObjectsV2Response response = await client.ListObjectsV2Async(r);
+                foreach (var userGroup in userGroups)
+                {
+                    var group =  await _db.Groups.FirstOrDefaultAsync(u => u.GroupId == userGroup.GroupId);
+                    userGroupsWithInfo.Add(group);
+                }
+                foreach (var item in userGroupsWithInfo)
+                {
+                    var member = await _db.GroupMembers.Where(x => x.GroupId == item.GroupId).ToListAsync();
+                    List<string> membersEmail = member.Select(x => x.Mail).ToList();
+                    string outpath = "";
+                    foreach (S3Object entry in response.S3Objects)
+                    {
+                        if (entry.Key == item.ImagePath)
+                        {
+                            GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
+                            {
+                                BucketName = bucketName,
+                                Key = entry.Key,
+                                Expires = DateTime.Now.AddHours(1)
+                            };
+                            outpath = client.GetPreSignedURL(urlRequest);
+                            break;
+                        }
+                    }
+                    GroupInfo gp = new GroupInfo(item.GroupId, item.Name, item.Description, outpath, membersEmail);
+                    groups.Add(gp);
+                }
+                return new GroupInfoResponseModel(groups);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse.Error(ex.Message);
+            }
+        }
     }
 }

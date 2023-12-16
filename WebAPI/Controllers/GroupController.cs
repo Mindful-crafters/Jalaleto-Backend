@@ -29,6 +29,19 @@ namespace WebAPI.Controllers
 
             return await _groupRepository.CreateGroup(request, Guid.Parse(UserIdString));
         }
-        
+        [HttpPost]
+        [Authorize]
+        [Route("Info")]
+        public async Task<ApiResponse> GroupInfo()
+        {
+            string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
+            if (string.IsNullOrWhiteSpace(UserIdString))
+            {
+                return ApiResponse.Unauthorized();
+            }
+
+            return await _groupRepository.GroupInfo(Guid.Parse(UserIdString));
+        }
+
     }
 }
