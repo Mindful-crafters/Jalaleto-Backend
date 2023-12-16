@@ -13,7 +13,7 @@ namespace Domain.Entities
         [Required]
         public Guid Owner { get; set; }
         public string Description { get; set; } = string.Empty;
-        public string ImageUrl { get; set; } = string.Empty;
+        public string ImagePath { get; set; } = string.Empty;
 
         public DateTime CreatedTime { get; set; } = DateTime.Now;
 
@@ -21,10 +21,11 @@ namespace Domain.Entities
         {
 
         }
-        public Group(string name, Guid owner)
+        public Group(string name, Guid owner, string desc)
         {
             Name = name;
             Owner = owner;
+            Description = desc;        
         }
 
     }

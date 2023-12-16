@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Application;
+using Application.RepositoryInterfaces;
+using Application.ViewModel;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
@@ -7,6 +11,24 @@ namespace WebAPI.Controllers
     [ApiController]
     public class GroupController : ControllerBase
     {
-        [HttpGet]
+        private readonly IGroupRepository _groupRepository;
+        public GroupController(IGroupRepository groupRepository)
+        {
+            _groupRepository = groupRepository;
+        }
+        [HttpPost]
+        [Authorize]
+        [Route("Create")]
+        public async Task<ApiResponse> CreateGroup([FromForm] CreateGroupRequestModel request)
+        {
+            string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
+            if (string.IsNullOrWhiteSpace(UserIdString))
+            {
+                return ApiResponse.Unauthorized();
+            }
+
+            return await _groupRepository.CreateGroup(request, Guid.Parse(UserIdString));
+        }
+        
     }
 }
