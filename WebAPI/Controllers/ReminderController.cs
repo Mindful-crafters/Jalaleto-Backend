@@ -1,8 +1,8 @@
 ﻿using Application.RepositoryInterfaces;
-using Application.ViewModel;
 using Application;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Application.ViewModel.Reminder;
 
 namespace WebAPI.Controllers
 {

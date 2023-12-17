@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.ViewModel
+namespace Application.ViewModel.Group
 {
     public class GroupInfoResponseModel : ApiResponse
     {
@@ -15,10 +15,10 @@ namespace Application.ViewModel
 
         public GroupInfoResponseModel(List<GroupInfo> groups)
         {
-            this.Success = true;
-            this.Code = 200;
-            this.Message = "Info Returned";
-            this.Data = groups;
+            Success = true;
+            Code = 200;
+            Message = "Info Returned";
+            Data = groups;
 
         }
     }

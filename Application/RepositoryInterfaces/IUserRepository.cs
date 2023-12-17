@@ -1,4 +1,4 @@
-﻿using Application.ViewModel;
+﻿using Application.ViewModel.User;
 using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 

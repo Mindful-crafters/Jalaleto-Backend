@@ -1,6 +1,6 @@
 ﻿using Application;
 using Application.RepositoryInterfaces;
-using Application.ViewModel;
+using Application.ViewModel.Group;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

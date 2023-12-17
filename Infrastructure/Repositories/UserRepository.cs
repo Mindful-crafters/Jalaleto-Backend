@@ -5,7 +5,7 @@ using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using Application;
 using Application.RepositoryInterfaces;
-using Application.ViewModel;
+using Application.ViewModel.User;
 using Domain.Entities;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Http;

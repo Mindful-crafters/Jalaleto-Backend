@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.ViewModel
+namespace Application.ViewModel.Reminder
 {
     public class CreateReminderRequestModel
     {
@@ -23,11 +23,8 @@ namespace Application.ViewModel
         public bool RemindByEmail { get; set; }
 
         [Required]
-        public RepeatInterval RepeatInterval { get; set; }
-
-        [Required]
         public PriorityLevel PriorityLevel { get; set; }
-         
+
         public string? Notes { get; set; }
 
     }

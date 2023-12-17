@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Application.ViewModel
+namespace Application.ViewModel.Reminder
 {
     public class ReminderInfoRequestModel
     {

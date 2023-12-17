@@ -4,19 +4,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.ViewModel
+namespace Application.ViewModel.User
 {
     public class CheckEmailResponseModel : ApiResponse
     {
         public bool Exists { get; set; }
         public CheckEmailResponseModel(bool exists)
         {
-            this.Success = true;
-            this.Code = 200;
-            this.Message = "success";
-            this.Exists = exists;
+            Success = true;
+            Code = 200;
+            Message = "success";
+            Exists = exists;
 
         }
     }
 }
-        
+

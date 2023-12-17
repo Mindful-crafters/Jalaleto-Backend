@@ -8,10 +8,9 @@ namespace Domain.Entities
     {
         public Reminder()
         {
-            
+
         }
-        public Reminder(string title, DateTime dateTime, int daysBeforeToRemind, bool remindByEmail,
-                        RepeatInterval repeatInterval, PriorityLevel priorityLevel, string notes, ReminderStatus status, Guid userId)
+        public Reminder(string title, DateTime dateTime, int daysBeforeToRemind, bool remindByEmail, PriorityLevel priorityLevel, string notes, ReminderStatus status, Guid userId)
         {
             Title = title;
             DateTime = dateTime;
@@ -19,7 +18,6 @@ namespace Domain.Entities
             LastModificationTimestamp = DateTime.Now;
             DaysBeforeToRemind = daysBeforeToRemind;
             RemindByEmail = remindByEmail;
-            RepeatInterval = repeatInterval;
             PriorityLevel = priorityLevel;
             Notes = notes;
             Status = status;
@@ -43,8 +41,6 @@ namespace Domain.Entities
         public int DaysBeforeToRemind { get; set; }
 
         public bool RemindByEmail { get; set; }
-
-        public RepeatInterval RepeatInterval { get; set; }
 
         public PriorityLevel PriorityLevel { get; set; }
 

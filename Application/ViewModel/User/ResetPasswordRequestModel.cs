@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.ViewModel
+namespace Application.ViewModel.User
 {
-    public class ResetPasswordRequestModel 
+    public class ResetPasswordRequestModel
     {
         [EmailAddress]
         public string Mail { get; set; } = string.Empty;

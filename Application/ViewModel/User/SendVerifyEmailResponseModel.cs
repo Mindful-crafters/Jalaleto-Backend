@@ -1,13 +1,13 @@
-﻿namespace Application.ViewModel
+﻿namespace Application.ViewModel.User
 {
     public class SendVerifyEmailResponseModel : ApiResponse
     {
         public SendVerifyEmailResponseModel(byte[] hash)
         {
-            this.Success = true;
-            this.Code = 200;
-            this.Message = "Email sent";
-            this.HashString = hash;
+            Success = true;
+            Code = 200;
+            Message = "Email sent";
+            HashString = hash;
         }
         public byte[] HashString { get; set; }
     }

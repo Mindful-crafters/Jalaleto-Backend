@@ -1,4 +1,4 @@
-﻿using Application.ViewModel;
+﻿using Application.ViewModel.Reminder;
 
 namespace Application.RepositoryInterfaces
 {

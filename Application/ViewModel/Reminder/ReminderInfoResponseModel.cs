@@ -7,21 +7,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.ViewModel
+namespace Application.ViewModel.Reminder
 {
     public class ReminderInfoResponseModel : ApiResponse
     {
         [JsonProperty("Data")]
         public List<ReminderInfo> Data { get; set; }
-        
+
         public ReminderInfoResponseModel(List<ReminderInfo> reminders)
         {
-            this.Success = true;
-            this.Code = 200;
-            this.Message = "Info Returned";
-            this.Data = reminders;
-            
+            Success = true;
+            Code = 200;
+            Message = "Info Returned";
+            Data = reminders;
+
         }
-       
+
     }
 }

@@ -5,16 +5,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.ViewModel
+namespace Application.ViewModel.User
 {
-    public class LoginResponseModel: ApiResponse
+    public class LoginResponseModel : ApiResponse
     {
         public LoginResponseModel(string token)
         {
-            this.Success = true;
-            this.Code = 200;
-            this.Message = "Logged in";
-            this.Token = token;
+            Success = true;
+            Code = 200;
+            Message = "Logged in";
+            Token = token;
         }
         public string Token { get; set; }
     }

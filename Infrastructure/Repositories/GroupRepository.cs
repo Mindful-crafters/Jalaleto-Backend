@@ -5,6 +5,7 @@ using Application;
 using Application.EntityModels;
 using Application.RepositoryInterfaces;
 using Application.ViewModel;
+using Application.ViewModel.Group;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

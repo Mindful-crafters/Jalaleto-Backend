@@ -2,6 +2,7 @@
 using Application.EntityModels;
 using Application.RepositoryInterfaces;
 using Application.ViewModel;
+using Application.ViewModel.Reminder;
 using Domain.Entities;
 using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +25,7 @@ namespace Infrastructure.Repositories
             try
             {
                 Reminder reminder = new Reminder(request.Title, request.DateTime, request.DaysBeforeToRemind, request.RemindByEmail,
-                request.RepeatInterval, request.PriorityLevel, request.Notes, ReminderStatus.Active, usreId);
+                request.PriorityLevel, request.Notes, ReminderStatus.Active, usreId);
 
                 await _db.AddAsync(reminder);
                 await _db.SaveChangesAsync();
@@ -50,7 +51,7 @@ namespace Infrastructure.Repositories
             foreach (var item in reminders)
             {
                 ReminderInfo info = new ReminderInfo(item.ReminderId, item.Title, item.DateTime,
-                    item.RepeatInterval, item.PriorityLevel, item.Notes, item.Status);
+                    item.PriorityLevel, item.Notes, item.Status);
                 rem.Add(info);
             }
             return new ReminderInfoResponseModel(rem);

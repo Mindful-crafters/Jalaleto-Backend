@@ -29,19 +29,17 @@ builder.Services.AddSwaggerGen(c =>
         Name = "Authorization",
         Type = SecuritySchemeType.ApiKey
     });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement {
-   {
-     new OpenApiSecurityScheme
-     {
-       Reference = new OpenApiReference
-       {
-         Type = ReferenceType.SecurityScheme,
-         Id = "Bearer"
-       }
-      },
-      new string[] { }
-    }
-  });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement {{
+        new OpenApiSecurityScheme
+        {
+            Reference = new OpenApiReference
+            {
+                Type = ReferenceType.SecurityScheme,
+                Id = "Bearer"
+            }
+        },
+        new string[] { }
+    }});
 });
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
@@ -71,7 +69,6 @@ var app = builder.Build();
 app.UseCors((policy) => policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 app.UseSwagger();
 app.UseSwaggerUI();
-
 
 app.UseHttpsRedirection();
 
