@@ -49,15 +49,15 @@ namespace WebAPI.Controllers
         public async Task<ApiResponse> ResetPassword(ResetPasswordRequestModel request)
         {
             return await _userRepository.ResetPassword(request);
-
         }
+
         [HttpPost]
         [Route("CheckEmail")]
         public async Task<ApiResponse> CheckEmail(SendVerifyEmailRequestModel request)
         {
             return await _userRepository.CheckEmail(request);
-
         }
+
         [HttpPost]
         [Authorize]
         [Route("ProfileInfo")]
@@ -70,9 +70,10 @@ namespace WebAPI.Controllers
             }
             return await _userRepository.ProfileInfo(Guid.Parse(UserIdString));
         }
+
         [HttpPost]
         [Authorize]
-       // [Consumes("multipart/form-data")]
+        // [Consumes("multipart/form-data")]
         [Route("EditProfile")]
         public async Task<ApiResponse> EditProfileInfo([FromForm] EditProfileInfoRequestModel request)
         {
@@ -83,7 +84,7 @@ namespace WebAPI.Controllers
             }
             return await _userRepository.EditProfileInfo(request, Guid.Parse(UserIdString));
         }
-       
+
         //[HttpPost]
         //[Authorize]
         //[Route("UploadImage")]
@@ -96,7 +97,6 @@ namespace WebAPI.Controllers
         //    }
         //    return await _userRepository.UploadImage(file, Guid.Parse(UserIdString));
         //}
-
 
     }
 }

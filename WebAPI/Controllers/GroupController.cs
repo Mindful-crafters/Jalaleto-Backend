@@ -16,6 +16,7 @@ namespace WebAPI.Controllers
         {
             _groupRepository = groupRepository;
         }
+
         [HttpPost]
         [Authorize]
         [Route("Create")]
@@ -29,6 +30,7 @@ namespace WebAPI.Controllers
 
             return await _groupRepository.CreateGroup(request, Guid.Parse(UserIdString));
         }
+
         [HttpPost]
         [Authorize]
         [Route("Info")]
