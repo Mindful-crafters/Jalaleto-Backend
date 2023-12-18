@@ -2,7 +2,7 @@
 using Application;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Application.ViewModel.Reminder;
+using Application.ViewModel.ReminderVM;
 
 namespace WebAPI.Controllers
 {

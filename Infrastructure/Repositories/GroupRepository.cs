@@ -4,8 +4,7 @@ using Amazon.S3.Transfer;
 using Application;
 using Application.EntityModels;
 using Application.RepositoryInterfaces;
-using Application.ViewModel;
-using Application.ViewModel.Group;
+using Application.ViewModel.GroupVM;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -66,7 +65,7 @@ namespace Infrastructure.Repositories
 
                 //saving image's name in bucket to database(user row)
                 GroupFromDb.ImagePath = newFileName;
-               // await _db.AddAsync(g);          
+                // await _db.AddAsync(g);          
                 await _db.AddAsync(member);
                 await _db.SaveChangesAsync();
                 return ApiResponse.Ok();
@@ -93,7 +92,7 @@ namespace Infrastructure.Repositories
                 string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
                 string bucketName = _configuration.GetSection("Liara:BucketName").Value;
                 string endPoint = _configuration.GetSection("Liara:EndPoint").Value;
-                
+
                 ListObjectsV2Request r = new ListObjectsV2Request
                 {
                     BucketName = bucketName
@@ -108,7 +107,7 @@ namespace Infrastructure.Repositories
                 ListObjectsV2Response response = await client.ListObjectsV2Async(r);
                 foreach (var userGroup in userGroups)
                 {
-                    var group =  await _db.Groups.FirstOrDefaultAsync(u => u.GroupId == userGroup.GroupId);
+                    var group = await _db.Groups.FirstOrDefaultAsync(u => u.GroupId == userGroup.GroupId);
                     userGroupsWithInfo.Add(group);
                 }
                 foreach (var item in userGroupsWithInfo)

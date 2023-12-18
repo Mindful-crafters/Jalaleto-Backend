@@ -1,8 +1,7 @@
 ﻿using Application;
 using Application.EntityModels;
 using Application.RepositoryInterfaces;
-using Application.ViewModel;
-using Application.ViewModel.Reminder;
+using Application.ViewModel.ReminderVM;
 using Domain.Entities;
 using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -42,7 +41,7 @@ namespace Infrastructure.Repositories
 
         public async Task<ApiResponse> ReminderInfo(ReminderInfoRequestModel request, Guid userId)
         {
-            var reminders = await _db.Reminders.Where(r=> r.UserId == userId && (r.DateTime >= request.From && r.DateTime <= request.To)).ToListAsync();
+            var reminders = await _db.Reminders.Where(r => r.UserId == userId && (r.DateTime >= request.From && r.DateTime <= request.To)).ToListAsync();
             if (reminders == null)
             {
                 return ApiResponse.Error("user not found");

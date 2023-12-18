@@ -9,7 +9,7 @@ namespace Domain.Entities
         {
 
         }
-        public User(string firstname, string lastname, string username, byte[] passwordHash, byte[] passwordSalt, 
+        public User(string firstname, string lastname, string username, byte[] passwordHash, byte[] passwordSalt,
             string mail, DateOnly birthday)
         {
             FirstName = firstname;
@@ -19,7 +19,7 @@ namespace Domain.Entities
             PasswordSalt = passwordSalt;
             Mail = mail;
             Birthday = birthday.ToDateTime(TimeOnly.Parse("10:00 PM"));
-            
+
         }
         public Guid Id { get; set; }
         public string Mail { get; set; }

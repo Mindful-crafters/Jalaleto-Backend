@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Application.ViewModel.User
+namespace Application.ViewModel.UserVM
 {
     public class SignUpRequestModel
     {

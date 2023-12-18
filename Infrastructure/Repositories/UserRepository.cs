@@ -1,21 +1,17 @@
-﻿using Amazon;
-using Amazon.Runtime;
-using Amazon.S3;
+﻿using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using Application;
 using Application.RepositoryInterfaces;
-using Application.ViewModel.User;
+using Application.ViewModel.UserVM;
 using Domain.Entities;
 using Infrastructure.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
-using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
 
@@ -239,7 +235,7 @@ namespace Infrastructure.Repositories
         {
             try
             {
-                
+
                 var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
                 if (user == null)
                 {
@@ -278,7 +274,7 @@ namespace Infrastructure.Repositories
                         outpath = client.GetPreSignedURL(urlRequest);
                     }
                 }
-                
+
                 return new ProfileInfoResponseModel(user.FirstName, user.LastName, user.UserName, Birthday, user.Mail, outpath);
             }
             catch (Exception ex)
@@ -296,7 +292,7 @@ namespace Infrastructure.Repositories
                 if (user == null)
                 {
                     throw new Exception("User not found");
-                }              
+                }
                 user.FirstName = request.FirstName;
                 user.LastName = request.LastName;
 
@@ -308,7 +304,7 @@ namespace Infrastructure.Repositories
                 // creating datebase and in in User.cs we coverted it back to dateonly
                 // with [Column(TypeName = "Date")]
                 user.Birthday = request.Birthday.ToDateTime(TimeOnly.Parse("10:00 PM"));
-               
+
 
                 if (user.UserName != request.UserName)
                 {
@@ -328,26 +324,26 @@ namespace Infrastructure.Repositories
                 string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
                 string bucketName = _configuration.GetSection("Liara:BucketName").Value;
                 string endPoint = _configuration.GetSection("Liara:EndPoint").Value;
-               
+
                 //string filePath = request.ImagePath;
-               
+
                 var credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
                 var config = new AmazonS3Config
                 {
                     ServiceURL = endPoint,
-                    ForcePathStyle = true 
+                    ForcePathStyle = true
                 };
                 using var client = new AmazonS3Client(credentials, config);
                 using var memoryStream = new MemoryStream();
                 await request.image.CopyToAsync(memoryStream);
                 using var fileTransferUtility = new TransferUtility(client);
-               // string[] type = request.ImagePath.Split('.');
+                // string[] type = request.ImagePath.Split('.');
                 string newFileName = user.Id + "-Image." + request.image.FileName;
                 var fileTransferUtilityRequest = new TransferUtilityUploadRequest
                 {
                     BucketName = bucketName,
                     InputStream = memoryStream,
-                    Key = newFileName 
+                    Key = newFileName
                 };
                 await fileTransferUtility.UploadAsync(fileTransferUtilityRequest);
 
@@ -367,7 +363,7 @@ namespace Infrastructure.Repositories
         //{
         //    try
         //    {
-                
+
         //    }
         //    catch (Exception ex)
         //    {

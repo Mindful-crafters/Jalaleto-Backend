@@ -1,6 +1,6 @@
 ﻿using Application;
 using Application.RepositoryInterfaces;
-using Application.ViewModel.User;
+using Application.ViewModel.UserVM;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

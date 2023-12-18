@@ -25,7 +25,7 @@ namespace Domain.Entities
         {
             Name = name;
             Owner = owner;
-            Description = desc;        
+            Description = desc;
         }
 
     }

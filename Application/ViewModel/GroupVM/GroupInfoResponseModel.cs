@@ -1,12 +1,7 @@
 ﻿using Application.EntityModels;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Application.ViewModel.Group
+namespace Application.ViewModel.GroupVM
 {
     public class GroupInfoResponseModel : ApiResponse
     {

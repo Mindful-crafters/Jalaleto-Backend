@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System.Security.Cryptography;
 using System.Text;
-//using System.Text;
 
 namespace Infrastructure.Services
 {
@@ -32,7 +31,7 @@ namespace Infrastructure.Services
             SHA256 sha256 = SHA256.Create();
             byte[] hashValue;
             UTF8Encoding objUtf8 = new UTF8Encoding();
-            hashValue = sha256.ComputeHash(objUtf8.GetBytes(str + _config.GetSection("AppSettings:EncryptKey") ));
+            hashValue = sha256.ComputeHash(objUtf8.GetBytes(str + _config.GetSection("AppSettings:EncryptKey")));
 
             return hashValue;
         }

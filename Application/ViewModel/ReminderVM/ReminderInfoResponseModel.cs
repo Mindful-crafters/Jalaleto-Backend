@@ -1,13 +1,7 @@
 ﻿using Application.EntityModels;
-using Domain.Enums;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Application.ViewModel.Reminder
+namespace Application.ViewModel.ReminderVM
 {
     public class ReminderInfoResponseModel : ApiResponse
     {

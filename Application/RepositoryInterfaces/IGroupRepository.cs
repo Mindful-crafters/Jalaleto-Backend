@@ -1,9 +1,4 @@
-﻿using Application.ViewModel.Group;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Application.ViewModel.GroupVM;
 
 namespace Application.RepositoryInterfaces
 {
@@ -13,5 +8,5 @@ namespace Application.RepositoryInterfaces
         public Task<ApiResponse> CreateGroup(CreateGroupRequestModel request, Guid userId);
         public Task<ApiResponse> GroupInfo(Guid userId);
     }
-    
+
 }
