@@ -52,23 +52,32 @@ namespace Infrastructure.Repositories
                 };
                 using var client = new AmazonS3Client(credentials, config);
                 using var memoryStream = new MemoryStream();
-                await request.Image.CopyToAsync(memoryStream);
-                using var fileTransferUtility = new TransferUtility(client);
-
-                string newFileName = GroupFromDb.GroupId + "-" + GroupFromDb.Name + "-Image." + request.Image.FileName;
-                var fileTransferUtilityRequest = new TransferUtilityUploadRequest
+                if (request.Image != null)
                 {
-                    BucketName = bucketName,
-                    InputStream = memoryStream,
-                    Key = newFileName
-                };
-                await fileTransferUtility.UploadAsync(fileTransferUtilityRequest);
+                    await request.Image.CopyToAsync(memoryStream);
+                    using var fileTransferUtility = new TransferUtility(client);
 
-                //saving image's name in bucket to database(user row)
-                GroupFromDb.ImagePath = newFileName;
-                // await _db.AddAsync(g);          
-                await _db.AddAsync(member);
-                await _db.SaveChangesAsync();
+                    string newFileName = GroupFromDb.GroupId + "-" + GroupFromDb.Name + "-Image." + request.Image.FileName;
+                    var fileTransferUtilityRequest = new TransferUtilityUploadRequest
+                    {
+                        BucketName = bucketName,
+                        InputStream = memoryStream,
+                        Key = newFileName
+                    };
+                    await fileTransferUtility.UploadAsync(fileTransferUtilityRequest);
+
+                    //saving image's name in bucket to database(user row)
+                    GroupFromDb.ImagePath = newFileName;
+                    // await _db.AddAsync(g);          
+                    await _db.AddAsync(member);
+                    await _db.SaveChangesAsync();
+                    
+                }
+                else
+                {
+                    GroupFromDb.ImagePath = string.Empty;
+                    await _db.SaveChangesAsync();
+                }
                 return ApiResponse.Ok();
             }
             catch (Exception ex)
