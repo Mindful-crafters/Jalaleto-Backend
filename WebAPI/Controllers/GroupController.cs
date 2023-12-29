@@ -56,6 +56,12 @@ namespace WebAPI.Controllers
 
             return await _groupRepository.UploadImage(image, Guid.Parse(UserIdString), groupId);    
         }
+        [HttpPost]
+        [Route("PopularGroups")]
+        public async Task<ApiResponse> PopularGroups(int cnt)
+        {
+            return await _groupRepository.PopularGroups(cnt);
+        }
 
     }
 }

@@ -5,6 +5,7 @@ using Application;
 using Application.EntityModels;
 using Application.RepositoryInterfaces;
 using Application.ViewModel.GroupVM;
+using Azure;
 using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -175,6 +176,78 @@ namespace Infrastructure.Repositories
                 return ApiResponse.Error(ex.Message);
             }
         }
+
+        public async Task<ApiResponse> PopularGroups(int topx = 3)
+        {
+            try
+            {
+                string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
+                string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
+                string bucketName = _configuration.GetSection("Liara:BucketName").Value;
+                string endPoint = _configuration.GetSection("Liara:EndPoint").Value;
+
+                ListObjectsV2Request r = new ListObjectsV2Request
+                {
+                    BucketName = bucketName
+                };
+                var credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
+                var config = new AmazonS3Config
+                {
+                    ServiceURL = endPoint,
+                    ForcePathStyle = true
+                };
+                using var client = new AmazonS3Client(credentials, config);
+                ListObjectsV2Response response = await client.ListObjectsV2Async(r);
+                var groupIds = await _db.Groups.Select(x => x.GroupId).ToListAsync();
+                Dictionary<Group, int> result = new Dictionary<Group, int>();
+                List<GroupInfo> groups = new List<GroupInfo>();
+                foreach (var id in groupIds)
+                {
+                    var gp = await _db.Groups.FirstOrDefaultAsync(gp => gp.GroupId == id);
+                    var x = await _db.GroupMembers.Where(gpm => gpm.GroupId == id).ToListAsync();
+                    result[gp] = x.Count;
+
+                }
+                var topGps = result.OrderByDescending(x => x.Value)
+                    .Select(x => x.Key)
+                    .Take(topx)
+                    .ToList();
+                foreach (var gp in topGps)
+                {
+                    var members = await _db.GroupMembers.Where(x => x.GroupId == gp.GroupId).ToListAsync();
+                    List<string> memberNames = new List<string>();
+                    foreach (var member in members)
+                    {
+                        var memberx = await _db.Users.Where(u => u.Id == member.UserId).ToListAsync();
+                        memberNames.Add(memberx.First().UserName);
+
+                    }
+                    string outpath = "";
+                    foreach (S3Object entry in response.S3Objects)
+                    {
+                        if (entry.Key == gp.ImagePath)
+                        {
+                            GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
+                            {
+                                BucketName = bucketName,
+                                Key = entry.Key,
+                                Expires = DateTime.Now.AddHours(1)
+                            };
+                            outpath = client.GetPreSignedURL(urlRequest);
+                            break;
+                        }
+                    }
+                    GroupInfo re = new GroupInfo(gp.GroupId, gp.Name, gp.Description, outpath, memberNames);
+                    groups.Add(re);
+                }
+                return new GroupInfoResponseModel(groups);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse.Error(ex.Message);
+            }
+        }
+
         public async Task<ApiResponse> UploadImage([FromForm] IFormFile Image, Guid userId, int groupId)
         {
             try
