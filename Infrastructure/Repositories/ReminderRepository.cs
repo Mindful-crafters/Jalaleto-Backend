@@ -19,25 +19,57 @@ namespace Infrastructure.Repositories
             _db = db;
             _configuration = configuration;
         }
-        public async Task<ApiResponse> CreateReminder(CreateReminderRequestModel request, Guid usreId)
+
+        public async Task<ApiResponse> CreateReminder(CreateReminderRequestModel request, Guid userId)
         {
             try
             {
-                Reminder reminder = new Reminder(request.Title, request.DateTime, request.DaysBeforeToRemind, request.RemindByEmail,
-                request.PriorityLevel, request.Notes, ReminderStatus.Active, usreId);
+                if (request.ReminderId != null)
+                {
+                    // ReminderId is provided, update the existing reminder
+                    var existingReminder = await _db.Reminders.FindAsync(request.ReminderId);
 
-                await _db.AddAsync(reminder);
-                await _db.SaveChangesAsync();
+                    if (existingReminder != null)
+                    {
+                        // Update existing reminder with new values
+                        existingReminder.Title = request.Title;
+                        existingReminder.DateTime = request.DateTime;
+                        existingReminder.DaysBeforeToRemind = request.DaysBeforeToRemind;
+                        existingReminder.RemindByEmail = request.RemindByEmail;
+                        existingReminder.PriorityLevel = request.PriorityLevel;
+                        existingReminder.Notes = request.Notes;
+                        existingReminder.Status = ReminderStatus.Active;
+                        existingReminder.UserId = userId;
 
-                return ApiResponse.Ok();
+                        // Save changes
+                        await _db.SaveChangesAsync();
+
+                        return ApiResponse.Ok();
+                    }
+                    else
+                    {
+                        // Handle case where ReminderId is provided but no matching reminder is found
+                        return ApiResponse.Error("No existing reminder found with the provided ReminderId.");
+                    }
+                }
+                else
+                {
+                    // ReminderId is not provided, create a new reminder
+                    Reminder reminder = new Reminder(request.Title, request.DateTime, request.DaysBeforeToRemind, request.RemindByEmail,
+                        request.PriorityLevel, request.Notes, ReminderStatus.Active, userId);
+
+                    await _db.AddAsync(reminder);
+                    await _db.SaveChangesAsync();
+
+                    return ApiResponse.Ok();
+                }
             }
             catch (Exception ex)
             {
                 return ApiResponse.Error(ex.Message);
             }
-
-
         }
+
 
         public async Task<ApiResponse> ReminderInfo(ReminderInfoRequestModel request, Guid userId)
         {

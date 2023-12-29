@@ -5,6 +5,8 @@ namespace Application.ViewModel.ReminderVM
 {
     public class CreateReminderRequestModel
     {
+        public int? ReminderId { get; set; }
+
         [Required]
         public required string Title { get; set; }
 
