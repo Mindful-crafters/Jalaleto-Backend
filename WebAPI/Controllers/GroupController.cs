@@ -43,6 +43,19 @@ namespace WebAPI.Controllers
 
             return await _groupRepository.GroupInfo(Guid.Parse(UserIdString));
         }
+        [HttpPost]
+        [Authorize]
+        [Route("UploadImage")]
+        public async Task<ApiResponse> UploadImage(IFormFile image,int groupId)
+        {
+            string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
+            if (string.IsNullOrWhiteSpace(UserIdString))
+            {
+                return ApiResponse.Unauthorized();
+            }
+
+            return await _groupRepository.UploadImage(image, Guid.Parse(UserIdString), groupId);    
+        }
 
     }
 }

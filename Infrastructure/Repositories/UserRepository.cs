@@ -6,6 +6,7 @@ using Application.RepositoryInterfaces;
 using Application.ViewModel.UserVM;
 using Domain.Entities;
 using Infrastructure.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -335,21 +336,28 @@ namespace Infrastructure.Repositories
                 };
                 using var client = new AmazonS3Client(credentials, config);
                 using var memoryStream = new MemoryStream();
-                await request.image.CopyToAsync(memoryStream);
-                using var fileTransferUtility = new TransferUtility(client);
-                // string[] type = request.ImagePath.Split('.');
-                string newFileName = user.Id + "-Image." + request.image.FileName;
-                var fileTransferUtilityRequest = new TransferUtilityUploadRequest
+                if (request.image != null)
                 {
-                    BucketName = bucketName,
-                    InputStream = memoryStream,
-                    Key = newFileName
-                };
-                await fileTransferUtility.UploadAsync(fileTransferUtilityRequest);
-
-                //saving image's name in bucket to database(user row)
-                user.ImagePath = newFileName;
-                await _db.SaveChangesAsync();
+                    await request.image.CopyToAsync(memoryStream);
+                    using var fileTransferUtility = new TransferUtility(client);
+                    // string[] type = request.ImagePath.Split('.');
+                    string newFileName = user.Id + "-Image." + request.image.FileName;
+                    var fileTransferUtilityRequest = new TransferUtilityUploadRequest
+                    {
+                        BucketName = bucketName,
+                        InputStream = memoryStream,
+                        Key = newFileName
+                    };
+                    await fileTransferUtility.UploadAsync(fileTransferUtilityRequest);
+                    //saving image's name in bucket to database(user row)
+                    user.ImagePath = newFileName;
+                    await _db.SaveChangesAsync();
+                }
+                else
+                {
+                    user.ImagePath = string.Empty;
+                    await _db.SaveChangesAsync();
+                }
                 return ApiResponse.Ok();
             }
             catch (Exception ex)
@@ -359,16 +367,6 @@ namespace Infrastructure.Repositories
 
         }
 
-        //public async Task<ApiResponse> UploadImage([FromForm] IFormFile image, Guid userId)
-        //{
-        //    try
-        //    {
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return ApiResponse.Error(ex.Message);
-        //    }
-        //}
+     
     }
 }

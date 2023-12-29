@@ -6,6 +6,7 @@ using Application.EntityModels;
 using Application.RepositoryInterfaces;
 using Application.ViewModel.GroupVM;
 using Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -35,7 +36,7 @@ namespace Infrastructure.Repositories
                 Domain.Entities.Group g = new Domain.Entities.Group(request.Name, userId, request.Description);
                 await _db.AddAsync(g);
                 await _db.SaveChangesAsync();
-                var GroupFromDb = _db.Groups.FirstOrDefault(gp => gp.Name == request.Name && gp.Owner == userId);
+                var GroupFromDb = await _db.Groups.FirstOrDefaultAsync(gp => gp.Name == request.Name && gp.Owner == userId);
                 GroupMembers member = new GroupMembers(GroupFromDb.GroupId, userId, user.Mail);
                 //image
                 string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
@@ -133,6 +134,61 @@ namespace Infrastructure.Repositories
                     groups.Add(gp);
                 }
                 return new GroupInfoResponseModel(groups);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse.Error(ex.Message);
+            }
+        }
+        public async Task<ApiResponse> UploadImage([FromForm] IFormFile Image, Guid userId, int groupId)
+        {
+            try
+            {
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                if (user == null)
+                {
+                    throw new Exception("User not found");
+                }
+                var group = await _db.Groups.FirstOrDefaultAsync(u => u.GroupId == groupId);
+                if (group == null)
+                {
+                    throw new Exception("Group not found");
+                }
+                if(user.Id != group.Owner)
+                {
+                    throw new Exception("only owener of the gorup can change image");
+                }
+                string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
+                string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
+                string bucketName = _configuration.GetSection("Liara:BucketName").Value;
+                string endPoint = _configuration.GetSection("Liara:EndPoint").Value;
+
+                var credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
+                var config = new AmazonS3Config
+                {
+                    ServiceURL = endPoint,
+                    ForcePathStyle = true
+                };
+                using var client = new AmazonS3Client(credentials, config);
+                using var memoryStream = new MemoryStream();
+                await Image.CopyToAsync(memoryStream);
+                using var fileTransferUtility = new TransferUtility(client);
+
+                string newFileName = "Group: " + group.GroupId+"-"+group.Name + "-Image." + Image.FileName;
+                var fileTransferUtilityRequest = new TransferUtilityUploadRequest
+                {
+                    BucketName = bucketName,
+                    InputStream = memoryStream,
+                    Key = newFileName
+                };
+                await fileTransferUtility.UploadAsync(fileTransferUtilityRequest);
+
+                //saving image's name in bucket to database(user row)
+                group.ImagePath = newFileName;
+                // await _db.AddAsync(g);          
+              
+                await _db.SaveChangesAsync();
+                return ApiResponse.Ok();
             }
             catch (Exception ex)
             {
