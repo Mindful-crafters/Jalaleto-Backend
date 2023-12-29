@@ -40,6 +40,7 @@ namespace Infrastructure.Repositories
                 var GroupFromDb = await _db.Groups.FirstOrDefaultAsync(gp => gp.Name == request.Name && gp.Owner == userId);
                 GroupMembers member = new GroupMembers(GroupFromDb.GroupId, userId, user.Mail);
                 List<GroupMembers> members = new List<GroupMembers>();
+                request.InvitedEmails = request.InvitedEmails.Distinct().ToList();
                 foreach (var item in request.InvitedEmails)
                 {
                     var invitedUser = await _db.Users.FirstOrDefaultAsync(u => u.Mail == item);
@@ -83,7 +84,8 @@ namespace Infrastructure.Repositories
                     await _db.AddAsync(member);
                     foreach (var item in members)
                     {
-                        await _db.AddAsync(item);
+                        if(member.UserId != item.UserId) //handle to not add him self to group again
+                            await _db.AddAsync(item);
                     }
                     await _db.SaveChangesAsync();
                     
@@ -94,7 +96,9 @@ namespace Infrastructure.Repositories
                     await _db.AddAsync(member);
                     foreach (var item in members)
                     {
-                        await _db.AddAsync(item);
+                        if (member.UserId != item.UserId) //handle to not add him self to group again
+                            await _db.AddAsync(item);
+                       
                     }
                     await _db.SaveChangesAsync();
                 }
