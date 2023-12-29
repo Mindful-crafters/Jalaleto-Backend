@@ -9,6 +9,7 @@ namespace Application.ViewModel.UserVM
         public string LastName { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;
         public DateOnly Birthday { get; set; }
-        public IFormFile image { get; set; }
+        
+        public IFormFile? image { get; set; }
     }
 }

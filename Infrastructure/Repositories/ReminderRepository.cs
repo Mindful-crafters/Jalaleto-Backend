@@ -82,7 +82,7 @@ namespace Infrastructure.Repositories
             foreach (var item in reminders)
             {
                 ReminderInfo info = new ReminderInfo(item.ReminderId, item.Title, item.DateTime,
-                    item.PriorityLevel, item.Notes, item.Status);
+                    item.PriorityLevel, item.Notes, item.Status, item.DaysBeforeToRemind, item.RemindByEmail);
                 rem.Add(info);
             }
             return new ReminderInfoResponseModel(rem);
