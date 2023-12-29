@@ -38,6 +38,16 @@ namespace Infrastructure.Repositories
                 await _db.SaveChangesAsync();
                 var GroupFromDb = await _db.Groups.FirstOrDefaultAsync(gp => gp.Name == request.Name && gp.Owner == userId);
                 GroupMembers member = new GroupMembers(GroupFromDb.GroupId, userId, user.Mail);
+                List<GroupMembers> members = new List<GroupMembers>();
+                foreach (var item in request.InvitedEmails)
+                {
+                    var invitedUser = await _db.Users.FirstOrDefaultAsync(u => u.Mail == item);
+                    if(invitedUser != null)
+                    {
+                        members.Add(new GroupMembers(GroupFromDb.GroupId, invitedUser.Id, invitedUser.Mail));
+                    }
+                    
+                }
                 //image
                 string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
                 string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
@@ -70,12 +80,21 @@ namespace Infrastructure.Repositories
                     GroupFromDb.ImagePath = newFileName;
                     // await _db.AddAsync(g);          
                     await _db.AddAsync(member);
+                    foreach (var item in members)
+                    {
+                        await _db.AddAsync(item);
+                    }
                     await _db.SaveChangesAsync();
                     
                 }
                 else
                 {
                     GroupFromDb.ImagePath = string.Empty;
+                    await _db.AddAsync(member);
+                    foreach (var item in members)
+                    {
+                        await _db.AddAsync(item);
+                    }
                     await _db.SaveChangesAsync();
                 }
                 return ApiResponse.Ok();
@@ -122,8 +141,15 @@ namespace Infrastructure.Repositories
                 }
                 foreach (var item in userGroupsWithInfo)
                 {
-                    var member = await _db.GroupMembers.Where(x => x.GroupId == item.GroupId).ToListAsync();
-                    List<string> membersEmail = member.Select(x => x.Mail).ToList();
+                    var members = await _db.GroupMembers.Where(x => x.GroupId == item.GroupId).ToListAsync();
+                    List<string> memberNames = new List<string>();
+                    foreach (var member in members)
+                    {
+                        var memberx = await _db.Users.Where(u => u.Id == member.UserId).ToListAsync();
+                        memberNames.Add(memberx.First().UserName);
+                            
+                    }
+                    List<string> membersEmail = members.Select(x => x.Mail).ToList();
                     string outpath = "";
                     foreach (S3Object entry in response.S3Objects)
                     {
@@ -139,7 +165,7 @@ namespace Infrastructure.Repositories
                             break;
                         }
                     }
-                    GroupInfo gp = new GroupInfo(item.GroupId, item.Name, item.Description, outpath, membersEmail);
+                    GroupInfo gp = new GroupInfo(item.GroupId, item.Name, item.Description, outpath, memberNames);
                     groups.Add(gp);
                 }
                 return new GroupInfoResponseModel(groups);
@@ -191,13 +217,32 @@ namespace Infrastructure.Repositories
                     Key = newFileName
                 };
                 await fileTransferUtility.UploadAsync(fileTransferUtilityRequest);
-
+                ListObjectsV2Request r = new ListObjectsV2Request
+                {
+                    BucketName = bucketName
+                };
+                
                 //saving image's name in bucket to database(user row)
                 group.ImagePath = newFileName;
                 // await _db.AddAsync(g);          
-              
+                ListObjectsV2Response response = await client.ListObjectsV2Async(r);
+                string outpath = "";
+                foreach (S3Object entry in response.S3Objects)
+                {
+                    if (entry.Key == group.ImagePath)
+                    {
+                        GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
+                        {
+                            BucketName = bucketName,
+                            Key = entry.Key,
+                            Expires = DateTime.Now.AddHours(1)
+                        };
+                        outpath = client.GetPreSignedURL(urlRequest);
+                        break;
+                    }
+                }
                 await _db.SaveChangesAsync();
-                return ApiResponse.Ok();
+                return ApiResponse.Ok(outpath);
             }
             catch (Exception ex)
             {
