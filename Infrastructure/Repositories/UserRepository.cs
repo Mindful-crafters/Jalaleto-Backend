@@ -75,7 +75,7 @@ namespace Infrastructure.Repositories
                         new Claim(ClaimTypes.Email, user.Mail),
                         new Claim(ClaimTypes.GivenName, user.FirstName + user.LastName),
                     }),
-                    Expires = DateTime.UtcNow.AddHours(1), // Set the token expiration time
+                    Expires = DateTime.UtcNow.AddYears(1), // Set the token expiration time
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
                 var token = tokenHandler.CreateToken(tokenDescriptor);
