@@ -15,12 +15,29 @@ namespace Domain.Entities
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         [Required]
-        public DateTime From { get; set; }
+        public DateTime When { get; set; }
         [Required]
-        public DateTime To { get; set; }
+        public Guid Owner { get; set; }
         public string? Location { get; set; }
         [Required]
         public int MemberLimit { get; set; }
+        public string Tag { get; set; } = string.Empty;
+        public int GroupId { get; set; }
+        public Event()
+        {
+            
+        }
+        public Event(string name, string desc, DateTime when, string location, int memlimit, string tag, Guid owner)
+        {
+            Name = name;
+            Description = desc;
+            When = when;
+            Location = location;
+            MemberLimit = memlimit;
+            Tag = tag;
+            Owner = owner;
+           
+        }
 
     }
 }
