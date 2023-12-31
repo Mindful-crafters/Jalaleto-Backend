@@ -1,4 +1,6 @@
-﻿namespace Application.EntityModels
+﻿using Domain.Entities;
+
+namespace Application.EntityModels
 {
     public class GroupInfo
     {
@@ -6,9 +8,9 @@
         public string Name { get; set; }
         public string Description { get; set; }
         public string ImageUrl { get; set; }
-        public List<string> Members { get; set; }
+        public List<UserInfo> Members { get; set; }
 
-        public GroupInfo(int gid, string name, string desc, string imageurl, List<string> members)
+        public GroupInfo(int gid, string name, string desc, string imageurl, List<UserInfo> members)
         {
             GroupId = gid;
             Name = name;

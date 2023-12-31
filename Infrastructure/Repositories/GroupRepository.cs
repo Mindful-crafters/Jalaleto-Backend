@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Repositories
 {
+
     public class GroupRepository : IGroupRepository
     {
         private readonly ApplicationDbContext _db;
@@ -110,6 +111,26 @@ namespace Infrastructure.Repositories
             }
         }
 
+        public async Task<ApiResponse> GetSingleGroupInfo(int GroupId, Guid userId)
+        {
+            try
+            {
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                if (user == null)
+                {
+                    return ApiResponse.Error("user not found");
+                }
+                var gp = await _db.Groups.FirstOrDefaultAsync(g => g.GroupId == GroupId);
+                return ApiResponse.Ok();
+
+            }
+            catch(Exception ex)
+            {
+                return ApiResponse.Error(ex.Message);
+            }
+        }
+
+
         public async Task<ApiResponse> GroupInfo(Guid userId)
         {
             try
@@ -146,15 +167,31 @@ namespace Infrastructure.Repositories
                 }
                 foreach (var item in userGroupsWithInfo)
                 {
+                    List<UserInfo> Members = new List<UserInfo>();
                     var members = await _db.GroupMembers.Where(x => x.GroupId == item.GroupId).ToListAsync();
-                    List<string> memberNames = new List<string>();
-                    foreach (var member in members)
+                    foreach (var m in members)
                     {
-                        var memberx = await _db.Users.Where(u => u.Id == member.UserId).ToListAsync();
-                        memberNames.Add(memberx.First().UserName);
-                            
+                        var ux = await _db.Users.FirstOrDefaultAsync(u => u.Id == m.UserId);
+                        var uinfo = new UserInfo(ux.Mail, ux.FirstName,ux.LastName,ux.UserName,ux.Birthday);
+                        uinfo.Image = "";
+                        foreach (S3Object entry in response.S3Objects)
+                        {
+                            if (entry.Key == ux.ImagePath)
+                            {
+                                GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
+                                {
+                                    BucketName = bucketName,
+                                    Key = entry.Key,
+                                    Expires = DateTime.Now.AddHours(1)
+                                };
+                                uinfo.Image = client.GetPreSignedURL(urlRequest);
+                                break;
+                            }
+                        }
+                        Members.Add(uinfo);
                     }
-                    List<string> membersEmail = members.Select(x => x.Mail).ToList();
+                    
+                    
                     string outpath = "";
                     foreach (S3Object entry in response.S3Objects)
                     {
@@ -170,7 +207,7 @@ namespace Infrastructure.Repositories
                             break;
                         }
                     }
-                    GroupInfo gp = new GroupInfo(item.GroupId, item.Name, item.Description, outpath, memberNames);
+                    GroupInfo gp = new GroupInfo(item.GroupId, item.Name, item.Description, outpath, Members);
                     groups.Add(gp);
                 }
                 return new GroupInfoResponseModel(groups);
@@ -218,13 +255,28 @@ namespace Infrastructure.Repositories
                     .ToList();
                 foreach (var gp in topGps)
                 {
+                    List<UserInfo> Members = new List<UserInfo>();
                     var members = await _db.GroupMembers.Where(x => x.GroupId == gp.GroupId).ToListAsync();
-                    List<string> memberNames = new List<string>();
-                    foreach (var member in members)
+                    foreach (var m in members)
                     {
-                        var memberx = await _db.Users.Where(u => u.Id == member.UserId).ToListAsync();
-                        memberNames.Add(memberx.First().UserName);
-
+                        var ux = await _db.Users.FirstOrDefaultAsync(u => u.Id == m.UserId);
+                        var uinfo = new UserInfo(ux.Mail, ux.FirstName, ux.LastName, ux.UserName, ux.Birthday);
+                        uinfo.Image = "";
+                        foreach (S3Object entry in response.S3Objects)
+                        {
+                            if (entry.Key == ux.ImagePath)
+                            {
+                                GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
+                                {
+                                    BucketName = bucketName,
+                                    Key = entry.Key,
+                                    Expires = DateTime.Now.AddHours(1)
+                                };
+                                uinfo.Image = client.GetPreSignedURL(urlRequest);
+                                break;
+                            }
+                        }
+                        Members.Add(uinfo);
                     }
                     string outpath = "";
                     foreach (S3Object entry in response.S3Objects)
@@ -241,7 +293,7 @@ namespace Infrastructure.Repositories
                             break;
                         }
                     }
-                    GroupInfo re = new GroupInfo(gp.GroupId, gp.Name, gp.Description, outpath, memberNames);
+                    GroupInfo re = new GroupInfo(gp.GroupId, gp.Name, gp.Description, outpath, Members);
                     groups.Add(re);
                 }
                 return new GroupInfoResponseModel(groups);
