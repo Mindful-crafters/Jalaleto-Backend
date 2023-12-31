@@ -121,7 +121,63 @@ namespace Infrastructure.Repositories
                     return ApiResponse.Error("user not found");
                 }
                 var gp = await _db.Groups.FirstOrDefaultAsync(g => g.GroupId == GroupId);
-                return ApiResponse.Ok();
+                string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
+                string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
+                string bucketName = _configuration.GetSection("Liara:BucketName").Value;
+                string endPoint = _configuration.GetSection("Liara:EndPoint").Value;
+
+                ListObjectsV2Request r = new ListObjectsV2Request
+                {
+                    BucketName = bucketName
+                };
+                var credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
+                var config = new AmazonS3Config
+                {
+                    ServiceURL = endPoint,
+                    ForcePathStyle = true
+                };
+                using var client = new AmazonS3Client(credentials, config);
+                ListObjectsV2Response response = await client.ListObjectsV2Async(r);
+                string outpath = "";
+                foreach (S3Object entry in response.S3Objects)
+                {
+                    if (entry.Key == gp.ImagePath)
+                    {
+                        GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
+                        {
+                            BucketName = bucketName,
+                            Key = entry.Key,
+                            Expires = DateTime.Now.AddHours(1)
+                        };
+                        outpath = client.GetPreSignedURL(urlRequest);
+                        break;
+                    }
+                }
+                List<UserInfo> Members = new List<UserInfo>();
+                var members = await _db.GroupMembers.Where(x => x.GroupId == gp.GroupId).ToListAsync();
+                foreach (var m in members)
+                {
+                    var ux = await _db.Users.FirstOrDefaultAsync(u => u.Id == m.UserId);
+                    var uinfo = new UserInfo(ux.Mail, ux.FirstName, ux.LastName, ux.UserName, ux.Birthday);
+                    uinfo.Image = "";
+                    foreach (S3Object entry in response.S3Objects)
+                    {
+                        if (entry.Key == ux.ImagePath)
+                        {
+                            GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
+                            {
+                                BucketName = bucketName,
+                                Key = entry.Key,
+                                Expires = DateTime.Now.AddHours(1)
+                            };
+                            uinfo.Image = client.GetPreSignedURL(urlRequest);
+                            break;
+                        }
+                    }
+                    Members.Add(uinfo);
+                }
+                var gpInfo = new GroupInfo(gp.GroupId, gp.Name, gp.Description, outpath, Members);
+                return new GroupInfoResponseModel(gpInfo);
 
             }
             catch(Exception ex)
