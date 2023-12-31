@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace WebAPI.Test
+namespace Infrastructure.Hubs
 {
     public sealed class SignalHub: Hub
     {
