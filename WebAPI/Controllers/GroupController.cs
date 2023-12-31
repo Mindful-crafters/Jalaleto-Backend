@@ -44,6 +44,19 @@ namespace WebAPI.Controllers
         }
         [HttpPost]
         [Authorize]
+        [Route("Search")]
+        public async Task<ApiResponse> SearchGroups(string GroupName)
+        {
+            string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
+            if (string.IsNullOrWhiteSpace(UserIdString))
+            {
+                return ApiResponse.Unauthorized();
+            }
+
+            return await _groupRepository.SearchGroups(GroupName, Guid.Parse(UserIdString));
+        }
+        [HttpPost]
+        [Authorize]
         [Route("Info")]
         public async Task<ApiResponse> GroupInfo()
         {
