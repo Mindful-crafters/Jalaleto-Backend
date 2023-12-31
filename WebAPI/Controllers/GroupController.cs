@@ -57,7 +57,7 @@ namespace WebAPI.Controllers
         }
         [HttpPost]
         [Authorize]
-        [Route("Info")]
+        [Route("MyGroups")]
         public async Task<ApiResponse> GroupInfo()
         {
             string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
