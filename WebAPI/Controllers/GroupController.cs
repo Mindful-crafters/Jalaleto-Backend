@@ -29,7 +29,19 @@ namespace WebAPI.Controllers
 
             return await _groupRepository.CreateGroup(request, Guid.Parse(UserIdString));
         }
+        [HttpPost]
+        [Authorize]
+        [Route("GpInfo")]
+        public async Task<ApiResponse> GetSingleGroupInfo(int GroupId)
+        {
+            string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
+            if (string.IsNullOrWhiteSpace(UserIdString))
+            {
+                return ApiResponse.Unauthorized();
+            }
 
+            return await _groupRepository.GetSingleGroupInfo(GroupId, Guid.Parse(UserIdString));
+        }
         [HttpPost]
         [Authorize]
         [Route("Info")]
@@ -42,6 +54,25 @@ namespace WebAPI.Controllers
             }
 
             return await _groupRepository.GroupInfo(Guid.Parse(UserIdString));
+        }
+        [HttpPost]
+        [Authorize]
+        [Route("UploadImage")]
+        public async Task<ApiResponse> UploadImage(IFormFile image,int groupId)
+        {
+            string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
+            if (string.IsNullOrWhiteSpace(UserIdString))
+            {
+                return ApiResponse.Unauthorized();
+            }
+
+            return await _groupRepository.UploadImage(image, Guid.Parse(UserIdString), groupId);    
+        }
+        [HttpPost]
+        [Route("PopularGroups")]
+        public async Task<ApiResponse> PopularGroups(int cnt)
+        {
+            return await _groupRepository.PopularGroups(cnt);
         }
 
     }
