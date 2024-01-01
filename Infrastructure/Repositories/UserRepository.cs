@@ -319,9 +319,12 @@ namespace Infrastructure.Repositories
                     }
                     user.UserName = request.UserName;
                 }
-                HashService.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
-                user.PasswordHash = passwordHash;
-                user.PasswordSalt = passwordSalt;
+                if (request.Password != null)
+                {
+                    HashService.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
+                    user.PasswordHash = passwordHash;
+                    user.PasswordSalt = passwordSalt;
+                }
 
                 //image
                 string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
