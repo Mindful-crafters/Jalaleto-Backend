@@ -57,8 +57,8 @@ namespace WebAPI.Controllers
         }
         [HttpPost]
         [Authorize]
-        [Route("MyGroups")]
-        public async Task<ApiResponse> GroupInfo()
+        [Route("Groups")]
+        public async Task<ApiResponse> GroupInfo(bool FilterMyGroups)
         {
             string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
             if (string.IsNullOrWhiteSpace(UserIdString))
@@ -66,7 +66,7 @@ namespace WebAPI.Controllers
                 return ApiResponse.Unauthorized();
             }
 
-            return await _groupRepository.GroupInfo(Guid.Parse(UserIdString));
+            return await _groupRepository.GroupsInfo(Guid.Parse(UserIdString), FilterMyGroups);
         }
         [HttpPost]
         [Authorize]
