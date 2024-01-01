@@ -121,6 +121,10 @@ namespace Infrastructure.Repositories
                     return ApiResponse.Error("user not found");
                 }
                 var gp = await _db.Groups.FirstOrDefaultAsync(g => g.GroupId == GroupId);
+                if (gp == null)
+                {
+                    throw new Exception("Group not found");
+                }
                 string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
                 string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
                 string bucketName = _configuration.GetSection("Liara:BucketName").Value;
@@ -187,7 +191,7 @@ namespace Infrastructure.Repositories
         }
 
 
-        public async Task<ApiResponse> GroupInfo(Guid userId)
+        public async Task<ApiResponse> GroupsInfo(Guid userId, bool filterMyGroups)
         {
             try
             {
@@ -196,9 +200,7 @@ namespace Infrastructure.Repositories
                 {
                     return ApiResponse.Error("user not found");
                 }
-                List<GroupInfo> groups = new List<GroupInfo>();
-                var userGroups = await _db.GroupMembers.Where(x => x.UserId == userId).ToListAsync();
-                List<Domain.Entities.Group> userGroupsWithInfo = new List<Domain.Entities.Group>();
+                
                 string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
                 string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
                 string bucketName = _configuration.GetSection("Liara:BucketName").Value;
@@ -216,10 +218,21 @@ namespace Infrastructure.Repositories
                 };
                 using var client = new AmazonS3Client(credentials, config);
                 ListObjectsV2Response response = await client.ListObjectsV2Async(r);
-                foreach (var userGroup in userGroups)
+
+                List<GroupInfo> groups = new List<GroupInfo>();
+                var userGroups = await _db.GroupMembers.Where(x => x.UserId == userId).ToListAsync();
+                List<Domain.Entities.Group> userGroupsWithInfo = new List<Domain.Entities.Group>();
+                if (filterMyGroups)
                 {
-                    var group = await _db.Groups.FirstOrDefaultAsync(u => u.GroupId == userGroup.GroupId);
-                    userGroupsWithInfo.Add(group);
+                    foreach (var userGroup in userGroups)
+                    {
+                        var group = await _db.Groups.FirstOrDefaultAsync(u => u.GroupId == userGroup.GroupId);
+                        userGroupsWithInfo.Add(group);
+                    }
+                }
+                else
+                {
+                    userGroupsWithInfo = await _db.Groups.Select(x => x).ToListAsync();
                 }
                 foreach (var item in userGroupsWithInfo)
                 {
@@ -362,51 +375,72 @@ namespace Infrastructure.Repositories
 
         public async Task<ApiResponse> SearchGroups(string pattern, Guid userId)
         {
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            if (user == null)
+            try
             {
-                throw new Exception("User not found");
-            }
-            List<Group> groupWithPattern;
-            if (pattern == null)
-            {
-                groupWithPattern = await _db.Groups.Select(x => x).ToListAsync();
-            }
-            else
-            {
-                groupWithPattern = await _db.Groups.Where(gp => gp.Name.Contains(pattern)).ToListAsync();
-            }
-            List<GroupInfo> groups = new List<GroupInfo>();
-            
-            string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
-            string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
-            string bucketName = _configuration.GetSection("Liara:BucketName").Value;
-            string endPoint = _configuration.GetSection("Liara:EndPoint").Value;
-
-            ListObjectsV2Request r = new ListObjectsV2Request
-            {
-                BucketName = bucketName
-            };
-            var credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
-            var config = new AmazonS3Config
-            {
-                ServiceURL = endPoint,
-                ForcePathStyle = true
-            };
-            using var client = new AmazonS3Client(credentials, config);
-            ListObjectsV2Response response = await client.ListObjectsV2Async(r);
-            foreach (var item in groupWithPattern)
-            {
-                List<UserInfo> Members = new List<UserInfo>();
-                var members = await _db.GroupMembers.Where(x => x.GroupId == item.GroupId).ToListAsync();
-                foreach (var m in members)
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                if (user == null)
                 {
-                    var ux = await _db.Users.FirstOrDefaultAsync(u => u.Id == m.UserId);
-                    var uinfo = new UserInfo(ux.Mail, ux.FirstName, ux.LastName, ux.UserName, ux.Birthday);
-                    uinfo.Image = "";
+                    throw new Exception("User not found");
+                }
+                List<Group> groupWithPattern;
+                if (pattern == null)
+                {
+                    groupWithPattern = await _db.Groups.Select(x => x).ToListAsync();
+                }
+                else
+                {
+                    groupWithPattern = await _db.Groups.Where(gp => gp.Name.Contains(pattern)).ToListAsync();
+                }
+                List<GroupInfo> groups = new List<GroupInfo>();
+
+                string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
+                string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
+                string bucketName = _configuration.GetSection("Liara:BucketName").Value;
+                string endPoint = _configuration.GetSection("Liara:EndPoint").Value;
+
+                ListObjectsV2Request r = new ListObjectsV2Request
+                {
+                    BucketName = bucketName
+                };
+                var credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
+                var config = new AmazonS3Config
+                {
+                    ServiceURL = endPoint,
+                    ForcePathStyle = true
+                };
+                using var client = new AmazonS3Client(credentials, config);
+                ListObjectsV2Response response = await client.ListObjectsV2Async(r);
+                foreach (var item in groupWithPattern)
+                {
+                    List<UserInfo> Members = new List<UserInfo>();
+                    var members = await _db.GroupMembers.Where(x => x.GroupId == item.GroupId).ToListAsync();
+                    foreach (var m in members)
+                    {
+                        var ux = await _db.Users.FirstOrDefaultAsync(u => u.Id == m.UserId);
+                        var uinfo = new UserInfo(ux.Mail, ux.FirstName, ux.LastName, ux.UserName, ux.Birthday);
+                        uinfo.Image = "";
+                        foreach (S3Object entry in response.S3Objects)
+                        {
+                            if (entry.Key == ux.ImagePath)
+                            {
+                                GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
+                                {
+                                    BucketName = bucketName,
+                                    Key = entry.Key,
+                                    Expires = DateTime.Now.AddHours(1)
+                                };
+                                uinfo.Image = client.GetPreSignedURL(urlRequest);
+                                break;
+                            }
+                        }
+                        Members.Add(uinfo);
+                    }
+
+
+                    string outpath = "";
                     foreach (S3Object entry in response.S3Objects)
                     {
-                        if (entry.Key == ux.ImagePath)
+                        if (entry.Key == item.ImagePath)
                         {
                             GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
                             {
@@ -414,33 +448,19 @@ namespace Infrastructure.Repositories
                                 Key = entry.Key,
                                 Expires = DateTime.Now.AddHours(1)
                             };
-                            uinfo.Image = client.GetPreSignedURL(urlRequest);
+                            outpath = client.GetPreSignedURL(urlRequest);
                             break;
                         }
                     }
-                    Members.Add(uinfo);
+                    GroupInfo gp = new GroupInfo(item.GroupId, item.Name, item.Description, outpath, Members);
+                    groups.Add(gp);
                 }
-
-
-                string outpath = "";
-                foreach (S3Object entry in response.S3Objects)
-                {
-                    if (entry.Key == item.ImagePath)
-                    {
-                        GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
-                        {
-                            BucketName = bucketName,
-                            Key = entry.Key,
-                            Expires = DateTime.Now.AddHours(1)
-                        };
-                        outpath = client.GetPreSignedURL(urlRequest);
-                        break;
-                    }
-                }
-                GroupInfo gp = new GroupInfo(item.GroupId, item.Name, item.Description, outpath, Members);
-                groups.Add(gp);
+                return new GroupInfoResponseModel(groups);
             }
-            return new GroupInfoResponseModel(groups);
+            catch (Exception ex)
+            {
+                return ApiResponse.Error(ex.Message);
+            }
         }
 
         public async Task<ApiResponse> UploadImage([FromForm] IFormFile Image, Guid userId, int groupId)
