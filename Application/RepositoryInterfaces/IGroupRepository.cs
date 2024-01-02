@@ -12,9 +12,7 @@ namespace Application.RepositoryInterfaces
         public Task<ApiResponse> PopularGroups(int cnt);
         public Task<ApiResponse> GetSingleGroupInfo(int GroupId, Guid userId);
         public Task<ApiResponse> SearchGroups(string pattern, Guid userId);
-
-
-
+        public Task<ApiResponse> JoinGroup(int GroupId, Guid userId);
     }
 
 }

@@ -14,8 +14,8 @@ namespace Application.ViewModel.GroupVM
             Code = 200;
             Message = "Info Returned";
             Data = groups;
-
         }
+
         public GroupInfoResponseModel(GroupInfo groups)
         {
             Success = true;

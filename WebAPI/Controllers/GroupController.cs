@@ -29,6 +29,7 @@ namespace WebAPI.Controllers
 
             return await _groupRepository.CreateGroup(request, Guid.Parse(UserIdString));
         }
+
         [HttpPost]
         [Authorize]
         [Route("GpInfo")]
@@ -42,6 +43,7 @@ namespace WebAPI.Controllers
 
             return await _groupRepository.GetSingleGroupInfo(GroupId, Guid.Parse(UserIdString));
         }
+
         [HttpPost]
         [Authorize]
         [Route("Search")]
@@ -55,6 +57,7 @@ namespace WebAPI.Controllers
 
             return await _groupRepository.SearchGroups(GroupName, Guid.Parse(UserIdString));
         }
+
         [HttpPost]
         [Authorize]
         [Route("Groups")]
@@ -68,10 +71,11 @@ namespace WebAPI.Controllers
 
             return await _groupRepository.GroupsInfo(Guid.Parse(UserIdString), FilterMyGroups);
         }
+
         [HttpPost]
         [Authorize]
         [Route("UploadImage")]
-        public async Task<ApiResponse> UploadImage(IFormFile image,int groupId)
+        public async Task<ApiResponse> UploadImage(IFormFile image, int groupId)
         {
             string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
             if (string.IsNullOrWhiteSpace(UserIdString))
@@ -79,8 +83,9 @@ namespace WebAPI.Controllers
                 return ApiResponse.Unauthorized();
             }
 
-            return await _groupRepository.UploadImage(image, Guid.Parse(UserIdString), groupId);    
+            return await _groupRepository.UploadImage(image, Guid.Parse(UserIdString), groupId);
         }
+
         [HttpPost]
         [Route("PopularGroups")]
         public async Task<ApiResponse> PopularGroups(int cnt)
@@ -88,5 +93,17 @@ namespace WebAPI.Controllers
             return await _groupRepository.PopularGroups(cnt);
         }
 
+        [HttpPost]
+        [Authorize]
+        [Route("JoinGroup")]
+        public async Task<ApiResponse> JoinGroup(int GroupId)
+        {
+            string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
+            if (string.IsNullOrWhiteSpace(UserIdString))
+            {
+                return ApiResponse.Unauthorized();
+            }
+            return await _groupRepository.JoinGroup(GroupId, Guid.Parse(UserIdString));
+        }
     }
 }

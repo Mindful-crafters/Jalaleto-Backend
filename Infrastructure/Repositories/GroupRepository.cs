@@ -5,7 +5,6 @@ using Application;
 using Application.EntityModels;
 using Application.RepositoryInterfaces;
 using Application.ViewModel.GroupVM;
-using Azure;
 using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -39,17 +38,17 @@ namespace Infrastructure.Repositories
                 await _db.AddAsync(g);
                 await _db.SaveChangesAsync();
                 var GroupFromDb = await _db.Groups.FirstOrDefaultAsync(gp => gp.Name == request.Name && gp.Owner == userId);
-                GroupMembers member = new GroupMembers(GroupFromDb.GroupId, userId, user.Mail);
+                GroupMembers member = new GroupMembers(GroupFromDb.GroupId, userId);
                 List<GroupMembers> members = new List<GroupMembers>();
                 request.InvitedEmails = request.InvitedEmails.Distinct().ToList();
                 foreach (var item in request.InvitedEmails)
                 {
                     var invitedUser = await _db.Users.FirstOrDefaultAsync(u => u.Mail == item);
-                    if(invitedUser != null)
+                    if (invitedUser != null)
                     {
-                        members.Add(new GroupMembers(GroupFromDb.GroupId, invitedUser.Id, invitedUser.Mail));
+                        members.Add(new GroupMembers(GroupFromDb.GroupId, invitedUser.Id));
                     }
-                    
+
                 }
                 //image
                 string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
@@ -85,11 +84,11 @@ namespace Infrastructure.Repositories
                     await _db.AddAsync(member);
                     foreach (var item in members)
                     {
-                        if(member.UserId != item.UserId) //handle to not add him self to group again
+                        if (member.UserId != item.UserId) //handle to not add him self to group again
                             await _db.AddAsync(item);
                     }
                     await _db.SaveChangesAsync();
-                    
+
                 }
                 else
                 {
@@ -99,7 +98,7 @@ namespace Infrastructure.Repositories
                     {
                         if (member.UserId != item.UserId) //handle to not add him self to group again
                             await _db.AddAsync(item);
-                       
+
                     }
                     await _db.SaveChangesAsync();
                 }
@@ -184,12 +183,11 @@ namespace Infrastructure.Repositories
                 return new GroupInfoResponseModel(gpInfo);
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return ApiResponse.Error(ex.Message);
             }
         }
-
 
         public async Task<ApiResponse> GroupsInfo(Guid userId, bool filterMyGroups)
         {
@@ -200,7 +198,7 @@ namespace Infrastructure.Repositories
                 {
                     return ApiResponse.Error("user not found");
                 }
-                
+
                 string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
                 string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
                 string bucketName = _configuration.GetSection("Liara:BucketName").Value;
@@ -241,7 +239,7 @@ namespace Infrastructure.Repositories
                     foreach (var m in members)
                     {
                         var ux = await _db.Users.FirstOrDefaultAsync(u => u.Id == m.UserId);
-                        var uinfo = new UserInfo(ux.Mail, ux.FirstName,ux.LastName,ux.UserName,ux.Birthday);
+                        var uinfo = new UserInfo(ux.Mail, ux.FirstName, ux.LastName, ux.UserName, ux.Birthday);
                         uinfo.Image = "";
                         foreach (S3Object entry in response.S3Objects)
                         {
@@ -259,8 +257,8 @@ namespace Infrastructure.Repositories
                         }
                         Members.Add(uinfo);
                     }
-                    
-                    
+
+
                     string outpath = "";
                     foreach (S3Object entry in response.S3Objects)
                     {
@@ -477,7 +475,7 @@ namespace Infrastructure.Repositories
                 {
                     throw new Exception("Group not found");
                 }
-                if(user.Id != group.Owner)
+                if (user.Id != group.Owner)
                 {
                     throw new Exception("only owener of the gorup can change image");
                 }
@@ -497,7 +495,7 @@ namespace Infrastructure.Repositories
                 await Image.CopyToAsync(memoryStream);
                 using var fileTransferUtility = new TransferUtility(client);
 
-                string newFileName = "Group: " + group.GroupId+"-"+group.Name + "-Image." + Image.FileName;
+                string newFileName = "Group: " + group.GroupId + "-" + group.Name + "-Image." + Image.FileName;
                 var fileTransferUtilityRequest = new TransferUtilityUploadRequest
                 {
                     BucketName = bucketName,
@@ -509,7 +507,7 @@ namespace Infrastructure.Repositories
                 {
                     BucketName = bucketName
                 };
-                
+
                 //saving image's name in bucket to database(user row)
                 group.ImagePath = newFileName;
                 // await _db.AddAsync(g);          
@@ -537,5 +535,41 @@ namespace Infrastructure.Repositories
                 return ApiResponse.Error(ex.Message);
             }
         }
+
+        public async Task<ApiResponse> JoinGroup(int GroupId, Guid userId)
+        {
+            try
+            {
+                var group = await _db.Groups
+                    .Where((group) => group.GroupId == GroupId)
+                    .ToListAsync();
+
+                if(group.Count == 0)
+                {
+                    throw new Exception("Group id is not valid!");
+                }
+
+                var member = await _db.GroupMembers
+                    .Where((member) => member.UserId == userId && member.GroupId == GroupId)
+                    .ToListAsync();
+
+                if (member.Count != 0)
+                {
+                    throw new Exception("Already joined");
+                }
+
+                var membership = new GroupMembers(GroupId, userId);
+                await _db.GroupMembers.AddAsync(membership);
+                await _db.SaveChangesAsync();
+
+                return ApiResponse.Ok();
+
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse.Error(ex.Message);
+            }
+        }
+
     }
 }
