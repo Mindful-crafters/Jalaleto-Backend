@@ -17,6 +17,13 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost]
+        [Route("LandingInfo")]
+        public async Task<ApiResponse> LandingInfo()
+        {
+            return await _userRepository.;
+        }
+
+        [HttpPost]
         [Route("SignUp")]
         public async Task<ApiResponse> Singup(SignUpRequestModel request)
         {

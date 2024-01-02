@@ -6,7 +6,6 @@ using Application.RepositoryInterfaces;
 using Application.ViewModel.UserVM;
 using Domain.Entities;
 using Infrastructure.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -27,6 +26,16 @@ namespace Infrastructure.Repositories
         {
             _db = db;
             _configuration = configuration;
+        }
+
+        public async Task<ApiResponse> LandingInfo()
+        {
+            var usersCount = await _db.Users.CountAsync();
+            var groupCount = await _db.Groups.CountAsync();
+            var reminderCount = await _db.Reminders.CountAsync();
+            var eventCount = await _db.Events.CountAsync();
+
+            return new LandingInfoResponsetModel(usersCount, groupCount, reminderCount, eventCount);
         }
 
         private async void CheckUserExists(Guid id)
@@ -373,6 +382,6 @@ namespace Infrastructure.Repositories
 
         }
 
-     
+
     }
 }
