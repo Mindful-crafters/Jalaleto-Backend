@@ -20,7 +20,7 @@ namespace WebAPI.Controllers
         [Route("LandingInfo")]
         public async Task<ApiResponse> LandingInfo()
         {
-            return await _userRepository.;
+            return await _userRepository.LandingInfo();
         }
 
         [HttpPost]

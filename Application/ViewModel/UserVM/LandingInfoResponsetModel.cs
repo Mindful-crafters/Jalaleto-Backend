@@ -2,10 +2,10 @@
 {
     public class LandingInfoResponsetModel : ApiResponse
     {
-        int UsersCount { get; set; }
-        int GroupCount { get; set; }
-        int ReminderCount { get; set; }
-        int EventCount { get; set; }
+        public int UsersCount { get; set; }
+        public int GroupCount { get; set; }
+        public int ReminderCount { get; set; }
+        public int EventCount { get; set; }
 
         public LandingInfoResponsetModel(int usersCount, int groupsCount, int reminderCount, int eventCount)
         {
