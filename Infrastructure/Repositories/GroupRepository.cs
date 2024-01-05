@@ -34,6 +34,11 @@ namespace Infrastructure.Repositories
                 {
                     return ApiResponse.Error("user not found");
                 }
+                var gpexists = await _db.Groups.FirstOrDefaultAsync(g => g.Name == request.Name);
+                if (gpexists != null)
+                {
+                    return ApiResponse.Error("group name must be uniqe. this group name already exists");
+                }
                 Domain.Entities.Group g = new Domain.Entities.Group(request.Name, userId, request.Description);
                 await _db.AddAsync(g);
                 await _db.SaveChangesAsync();
