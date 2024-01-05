@@ -32,6 +32,7 @@ namespace Domain.Entities
         public byte[] PasswordSalt { get; set; } = new byte[32];
         public DateTime CreatedTime { get; set; } = DateTime.Now;
         public string ImagePath { get; set; } = string.Empty;
+        public string Interests { get; set; } = string.Empty;
 
     }
 }

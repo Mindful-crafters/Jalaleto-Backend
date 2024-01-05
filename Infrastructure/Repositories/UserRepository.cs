@@ -284,8 +284,8 @@ namespace Infrastructure.Repositories
                         outpath = client.GetPreSignedURL(urlRequest);
                     }
                 }
-
-                return new ProfileInfoResponseModel(user.FirstName, user.LastName, user.UserName, Birthday, user.Mail, outpath);
+                List<string> interests = user.Interests.Split().ToList();
+                return new ProfileInfoResponseModel(user.FirstName, user.LastName, user.UserName, Birthday, user.Mail, outpath, interests);
             }
             catch (Exception ex)
             {
@@ -334,6 +334,16 @@ namespace Infrastructure.Repositories
                     user.PasswordHash = passwordHash;
                     user.PasswordSalt = passwordSalt;
                 }
+
+
+                string interests = "";
+                foreach (var str in request.Interests)
+                {
+                    interests = string.Concat(str+" ", interests);
+                }
+                interests = interests.Trim();
+                user.Interests = interests;
+
 
                 //image
                 string accessKey = _configuration.GetSection("Liara:Accesskey").Value;

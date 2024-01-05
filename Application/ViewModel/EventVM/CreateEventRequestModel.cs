@@ -13,7 +13,7 @@ namespace Application.ViewModel.EventVM
         public DateTime When { get; set; }
         public string? Location { get; set; }
         public int MemberLimit { get; set; }
-        public string Tag { get; set; } = string.Empty;
+        public List<string> Tag { get; set; } 
 
     }
 }
