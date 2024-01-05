@@ -32,8 +32,16 @@ namespace Infrastructure.Repositories
                 {
                     return ApiResponse.Error("user not found");
                 }
+
+                string tags = "";
+                foreach (var str in request.Tag)
+                {
+                    tags = string.Concat(str + " ", tags);
+                }
+                tags = tags.Trim();
+
                 Event e = new Event(request.Name, request.Description, request.When,
-                    request.Location, request.MemberLimit, request.Tag, userId);
+                    request.Location, request.MemberLimit, tags, userId);
                 await _db.AddAsync(e);
                 await _db.SaveChangesAsync();
                 var EventFromDb = await _db.Events.FirstOrDefaultAsync(ev => ev.Owner == userId && ev.Name == request.Name);

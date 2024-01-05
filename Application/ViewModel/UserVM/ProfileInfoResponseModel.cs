@@ -8,8 +8,11 @@
         public string Birthday { get; set; }
         public string Email { get; set; }
         public string ImagePath { get; set; }
+        public List<string> Interests { get; set; }
 
-        public ProfileInfoResponseModel(string FirstName, string LastName, string Username, string birthday, string email, string imagePath)
+
+        public ProfileInfoResponseModel(string FirstName, string LastName,
+            string Username, string birthday, string email, string imagePath, List<string> interests)
         {
             Success = true;
             Code = 200;
@@ -20,6 +23,7 @@
             Birthday = birthday;
             Email = email;
             ImagePath = imagePath;
+            Interests = interests;
         }
     }
 }
