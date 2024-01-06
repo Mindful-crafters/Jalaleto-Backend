@@ -392,7 +392,7 @@ namespace Infrastructure.Repositories
                 }
                 else
                 {
-                    groupWithPattern = await _db.Groups.Where(gp => gp.Name.Contains(pattern)).ToListAsync();
+                    groupWithPattern = await _db.Groups.Where(gp => gp.Name == pattern).ToListAsync();
                 }
                 List<GroupInfo> groups = new List<GroupInfo>();
 
