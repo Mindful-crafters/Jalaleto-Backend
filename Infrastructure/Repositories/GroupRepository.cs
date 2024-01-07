@@ -161,6 +161,8 @@ namespace Infrastructure.Repositories
                         break;
                     }
                 }
+
+                //members
                 List<UserInfo> Members = new List<UserInfo>();
                 var members = await _db.GroupMembers.Where(x => x.GroupId == gp.GroupId).ToListAsync();
                 foreach (var m in members)
@@ -184,7 +186,41 @@ namespace Infrastructure.Repositories
                     }
                     Members.Add(uinfo);
                 }
-                var gpInfo = new GroupInfo(gp.GroupId, gp.Name, gp.Description, outpath, Members);
+
+                //events
+                List<EventInfo> Events = new List<EventInfo>();
+                var events = await _db.Events.Where(x => x.GroupId == gp.GroupId).ToListAsync();
+                foreach(var ev in events)
+                {
+                    List<UserInfo> EvMembers = new List<UserInfo>();
+                    var evMembers = await _db.EventsMembers.Where(x => x.EventId == ev.EventId && x.GroupId == gp.GroupId).ToListAsync();
+                    foreach (var evm in evMembers)
+                    {
+                        var ux = await _db.Users.FirstOrDefaultAsync(u => u.Id == evm.UserId);
+                        var uinfo = new UserInfo(ux.Mail, ux.FirstName, ux.LastName, ux.UserName, ux.Birthday);
+                        uinfo.Image = "";
+                        foreach (S3Object entry in response.S3Objects)
+                        {
+                            if (entry.Key == ux.ImagePath)
+                            {
+                                GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
+                                {
+                                    BucketName = bucketName,
+                                    Key = entry.Key,
+                                    Expires = DateTime.Now.AddHours(1)
+                                };
+                                uinfo.Image = client.GetPreSignedURL(urlRequest);
+                                break;
+                            }
+                        }
+                        EvMembers.Add(uinfo);
+                    }
+                    List<string> tags = ev.Tag.Split().ToList();
+                    EventInfo e = new EventInfo(ev.EventId, ev.Name,ev.Description, ev.When, EvMembers,ev.MemberLimit, tags);
+                    Events.Add(e);
+                }
+
+                var gpInfo = new GroupInfo(gp.GroupId, gp.Name, gp.Description, outpath, Members, Events);
                 return new GroupInfoResponseModel(gpInfo);
 
             }
@@ -239,6 +275,7 @@ namespace Infrastructure.Repositories
                 }
                 foreach (var item in userGroupsWithInfo)
                 {
+                    //members
                     List<UserInfo> Members = new List<UserInfo>();
                     var members = await _db.GroupMembers.Where(x => x.GroupId == item.GroupId).ToListAsync();
                     foreach (var m in members)
@@ -263,7 +300,40 @@ namespace Infrastructure.Repositories
                         Members.Add(uinfo);
                     }
 
-
+                    //events
+                    List<EventInfo> Events = new List<EventInfo>();
+                    var events = await _db.Events.Where(x => x.GroupId == item.GroupId).ToListAsync();
+                    foreach (var ev in events)
+                    {
+                        //event members
+                        List<UserInfo> EvMembers = new List<UserInfo>();
+                        var evMembers = await _db.EventsMembers.Where(x => x.EventId == ev.EventId && x.GroupId == item.GroupId).ToListAsync();
+                        foreach (var evm in evMembers)
+                        {
+                            var ux = await _db.Users.FirstOrDefaultAsync(u => u.Id == evm.UserId);
+                            var uinfo = new UserInfo(ux.Mail, ux.FirstName, ux.LastName, ux.UserName, ux.Birthday);
+                            uinfo.Image = "";
+                            foreach (S3Object entry in response.S3Objects)
+                            {
+                                if (entry.Key == ux.ImagePath)
+                                {
+                                    GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
+                                    {
+                                        BucketName = bucketName,
+                                        Key = entry.Key,
+                                        Expires = DateTime.Now.AddHours(1)
+                                    };
+                                    uinfo.Image = client.GetPreSignedURL(urlRequest);
+                                    break;
+                                }
+                            }
+                            EvMembers.Add(uinfo);
+                        }
+                        List<string> tags = ev.Tag.Split().ToList();
+                        EventInfo e = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, EvMembers, ev.MemberLimit, tags);
+                        Events.Add(e);
+                    }
+                    //gp image
                     string outpath = "";
                     foreach (S3Object entry in response.S3Objects)
                     {
@@ -279,7 +349,7 @@ namespace Infrastructure.Repositories
                             break;
                         }
                     }
-                    GroupInfo gp = new GroupInfo(item.GroupId, item.Name, item.Description, outpath, Members);
+                    GroupInfo gp = new GroupInfo(item.GroupId, item.Name, item.Description, outpath, Members, Events);
                     groups.Add(gp);
                 }
                 return new GroupInfoResponseModel(groups);
@@ -327,6 +397,7 @@ namespace Infrastructure.Repositories
                     .ToList();
                 foreach (var gp in topGps)
                 {
+                    //members
                     List<UserInfo> Members = new List<UserInfo>();
                     var members = await _db.GroupMembers.Where(x => x.GroupId == gp.GroupId).ToListAsync();
                     foreach (var m in members)
@@ -350,6 +421,42 @@ namespace Infrastructure.Repositories
                         }
                         Members.Add(uinfo);
                     }
+
+                    //events
+                    List<EventInfo> Events = new List<EventInfo>();
+                    var events = await _db.Events.Where(x => x.GroupId == gp.GroupId).ToListAsync();
+                    foreach (var ev in events)
+                    {
+                        //event members
+                        List<UserInfo> EvMembers = new List<UserInfo>();
+                        var evMembers = await _db.EventsMembers.Where(x => x.EventId == ev.EventId && x.GroupId == gp.GroupId).ToListAsync();
+                        foreach (var evm in evMembers)
+                        {
+                            var ux = await _db.Users.FirstOrDefaultAsync(u => u.Id == evm.UserId);
+                            var uinfo = new UserInfo(ux.Mail, ux.FirstName, ux.LastName, ux.UserName, ux.Birthday);
+                            uinfo.Image = "";
+                            foreach (S3Object entry in response.S3Objects)
+                            {
+                                if (entry.Key == ux.ImagePath)
+                                {
+                                    GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
+                                    {
+                                        BucketName = bucketName,
+                                        Key = entry.Key,
+                                        Expires = DateTime.Now.AddHours(1)
+                                    };
+                                    uinfo.Image = client.GetPreSignedURL(urlRequest);
+                                    break;
+                                }
+                            }
+                            EvMembers.Add(uinfo);
+                        }
+                        List<string> tags = ev.Tag.Split().ToList();
+                        EventInfo e = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, EvMembers, ev.MemberLimit, tags);
+                        Events.Add(e);
+                    }
+
+                    //gp image
                     string outpath = "";
                     foreach (S3Object entry in response.S3Objects)
                     {
@@ -365,7 +472,7 @@ namespace Infrastructure.Repositories
                             break;
                         }
                     }
-                    GroupInfo re = new GroupInfo(gp.GroupId, gp.Name, gp.Description, outpath, Members);
+                    GroupInfo re = new GroupInfo(gp.GroupId, gp.Name, gp.Description, outpath, Members,Events);
                     groups.Add(re);
                 }
                 return new GroupInfoResponseModel(groups);
@@ -415,6 +522,7 @@ namespace Infrastructure.Repositories
                 ListObjectsV2Response response = await client.ListObjectsV2Async(r);
                 foreach (var item in groupWithPattern)
                 {
+                    //members
                     List<UserInfo> Members = new List<UserInfo>();
                     var members = await _db.GroupMembers.Where(x => x.GroupId == item.GroupId).ToListAsync();
                     foreach (var m in members)
@@ -439,7 +547,40 @@ namespace Infrastructure.Repositories
                         Members.Add(uinfo);
                     }
 
+                    //events
+                    List<EventInfo> Events = new List<EventInfo>();
+                    var events = await _db.Events.Where(x => x.GroupId == item.GroupId).ToListAsync();
+                    foreach (var ev in events)
+                    {
+                        List<UserInfo> EvMembers = new List<UserInfo>();
+                        var evMembers = await _db.EventsMembers.Where(x => x.EventId == ev.EventId && x.GroupId == item.GroupId).ToListAsync();
+                        foreach (var evm in evMembers)
+                        {
+                            var ux = await _db.Users.FirstOrDefaultAsync(u => u.Id == evm.UserId);
+                            var uinfo = new UserInfo(ux.Mail, ux.FirstName, ux.LastName, ux.UserName, ux.Birthday);
+                            uinfo.Image = "";
+                            foreach (S3Object entry in response.S3Objects)
+                            {
+                                if (entry.Key == ux.ImagePath)
+                                {
+                                    GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
+                                    {
+                                        BucketName = bucketName,
+                                        Key = entry.Key,
+                                        Expires = DateTime.Now.AddHours(1)
+                                    };
+                                    uinfo.Image = client.GetPreSignedURL(urlRequest);
+                                    break;
+                                }
+                            }
+                            EvMembers.Add(uinfo);
+                        }
+                        List<string> tags = ev.Tag.Split().ToList();
+                        EventInfo e = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, EvMembers, ev.MemberLimit, tags);
+                        Events.Add(e);
+                    }
 
+                    //gp image
                     string outpath = "";
                     foreach (S3Object entry in response.S3Objects)
                     {
@@ -455,7 +596,7 @@ namespace Infrastructure.Repositories
                             break;
                         }
                     }
-                    GroupInfo gp = new GroupInfo(item.GroupId, item.Name, item.Description, outpath, Members);
+                    GroupInfo gp = new GroupInfo(item.GroupId, item.Name, item.Description, outpath, Members, Events);
                     groups.Add(gp);
                 }
                 return new GroupInfoResponseModel(groups);
