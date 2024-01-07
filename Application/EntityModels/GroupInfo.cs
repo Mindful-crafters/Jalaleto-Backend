@@ -9,14 +9,16 @@ namespace Application.EntityModels
         public string Description { get; set; }
         public string ImageUrl { get; set; }
         public List<UserInfo> Members { get; set; }
+        public List<EventInfo> Events { get; set; }
 
-        public GroupInfo(int gid, string name, string desc, string imageurl, List<UserInfo> members)
+        public GroupInfo(int gid, string name, string desc, string imageurl, List<UserInfo> members, List<EventInfo> events)
         {
             GroupId = gid;
             Name = name;
             Description = desc;
             ImageUrl = imageurl;
             Members = members;
+            Events = events;
         }
     }
 }
