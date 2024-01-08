@@ -30,7 +30,7 @@ namespace WebAPI.Controllers
         [HttpPost]
         [Authorize]
         [Route("Events")]
-        public async Task<ApiResponse> Events(List<string> filter)
+        public async Task<ApiResponse> Events(List<string>? filter)
         {
             string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
             if (string.IsNullOrWhiteSpace(UserIdString))
@@ -38,6 +38,18 @@ namespace WebAPI.Controllers
                 return ApiResponse.Unauthorized();
             }
             return await _groupRepository.Events(filter, Guid.Parse(UserIdString));
+        }
+        [HttpPost]
+        [Authorize]
+        [Route("Join")]
+        public async Task<ApiResponse> JoinEvent(int groupId, Guid eventId)
+        {
+            string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
+            if (string.IsNullOrWhiteSpace(UserIdString))
+            {
+                return ApiResponse.Unauthorized();
+            }
+            return await _groupRepository.JoinEvent(groupId, Guid.Parse(UserIdString), eventId);
         }
 
     }
