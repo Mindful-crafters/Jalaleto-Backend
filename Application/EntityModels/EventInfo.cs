@@ -8,6 +8,7 @@ namespace Application.EntityModels
 {
     public class EventInfo
     {
+        public int GroupId { get; set; }
         public Guid EventId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
@@ -16,8 +17,9 @@ namespace Application.EntityModels
         public int MemberLimit { get; set; }
         public List<string> Tag { get; set; } 
 
+
         public EventInfo(Guid eid, string name, string desc, DateTime When, List<UserInfo> members, 
-            int memberlim , List<string>  tags)
+            int memberlim , List<string>  tags, int groupId)
         {
             EventId = eid;
             Name = name;
@@ -27,6 +29,7 @@ namespace Application.EntityModels
             this.When = When;
             MemberLimit = memberlim;
             Tag = tags;
+            GroupId = groupId;
 
         }
     }

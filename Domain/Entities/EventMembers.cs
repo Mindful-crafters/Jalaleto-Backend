@@ -14,10 +14,11 @@ namespace Domain.Entities
         public Guid UserId { get; set; }
         public int GroupId { get; set; }
         public Guid EventId { get; set; }
-        public EventMembers(Guid userId, Guid eventId)
+        public EventMembers(Guid userId, Guid eventId, int groupId)
         {
             UserId = userId;
             EventId = eventId;
+            GroupId = groupId;
         }
     }
 }

@@ -8,6 +8,7 @@ namespace Application.ViewModel.EventVM
 {
     public class CreateEventRequestModel
     {
+        public int GroupId { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public DateTime When { get; set; }

@@ -43,6 +43,12 @@ namespace Infrastructure.Repositories
                 {
                     return ApiResponse.Error("event name must be uniqe. this event name already exists");
                 }
+                var group = await _db.Groups.FirstOrDefaultAsync(gp => gp.GroupId == request.GroupId);
+   
+                if (group == null)
+                {
+                    throw new Exception("Group id is not valid!");
+                }
                 string tags = "";
                 foreach (var str in request.Tag)
                 {
@@ -51,11 +57,11 @@ namespace Infrastructure.Repositories
                 tags = tags.Trim();
 
                 Event e = new Event(request.Name, request.Description, request.When,
-                    request.Location, request.MemberLimit, tags, userId);
+                    request.Location, request.MemberLimit, tags, userId, request.GroupId);
                 await _db.AddAsync(e);
                 await _db.SaveChangesAsync();
                 var EventFromDb = await _db.Events.FirstOrDefaultAsync(ev => ev.Owner == userId && ev.Name == request.Name);
-                EventMembers evemtMember = new EventMembers(userId, EventFromDb.EventId);
+                EventMembers evemtMember = new EventMembers(userId, EventFromDb.EventId, EventFromDb.GroupId);
                 await _db.AddAsync(evemtMember);
                 await _db.SaveChangesAsync();
                 return ApiResponse.Ok();
@@ -66,7 +72,7 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task<ApiResponse> Events(List<string> filter, Guid userId)
+        public async Task<ApiResponse> Events(List<string>? filter, Guid userId)
         {
             try
             {
@@ -96,7 +102,7 @@ namespace Infrastructure.Repositories
                 List<EventInfo> events = new List<EventInfo>();
                 var allEvents = await _db.Events.Select(x => x).ToListAsync();
                 List<Event> Evs = new List<Event>();
-                if (filter != null)
+                if (filter.Count != 0)
                 {
                     foreach(string tag in filter){
                         foreach (var ev in allEvents)
@@ -140,7 +146,7 @@ namespace Infrastructure.Repositories
                     List<string> tags = ev.Tag.Split().ToList();
 
 
-                    EventInfo evnt = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, Members, ev.MemberLimit, tags);
+                    EventInfo evnt = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, Members, ev.MemberLimit, tags, ev.GroupId);
                     events.Add(evnt);
                 }
                 return new EventInfoResponseModel(events);

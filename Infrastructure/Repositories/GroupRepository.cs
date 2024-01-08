@@ -216,7 +216,7 @@ namespace Infrastructure.Repositories
                         EvMembers.Add(uinfo);
                     }
                     List<string> tags = ev.Tag.Split().ToList();
-                    EventInfo e = new EventInfo(ev.EventId, ev.Name,ev.Description, ev.When, EvMembers,ev.MemberLimit, tags);
+                    EventInfo e = new EventInfo(ev.EventId, ev.Name,ev.Description, ev.When, EvMembers,ev.MemberLimit, tags, ev.GroupId);
                     Events.Add(e);
                 }
 
@@ -330,7 +330,7 @@ namespace Infrastructure.Repositories
                             EvMembers.Add(uinfo);
                         }
                         List<string> tags = ev.Tag.Split().ToList();
-                        EventInfo e = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, EvMembers, ev.MemberLimit, tags);
+                        EventInfo e = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, EvMembers, ev.MemberLimit, tags, ev.GroupId);
                         Events.Add(e);
                     }
                     //gp image
@@ -452,7 +452,7 @@ namespace Infrastructure.Repositories
                             EvMembers.Add(uinfo);
                         }
                         List<string> tags = ev.Tag.Split().ToList();
-                        EventInfo e = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, EvMembers, ev.MemberLimit, tags);
+                        EventInfo e = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, EvMembers, ev.MemberLimit, tags, ev.GroupId);
                         Events.Add(e);
                     }
 
@@ -576,7 +576,7 @@ namespace Infrastructure.Repositories
                             EvMembers.Add(uinfo);
                         }
                         List<string> tags = ev.Tag.Split().ToList();
-                        EventInfo e = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, EvMembers, ev.MemberLimit, tags);
+                        EventInfo e = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, EvMembers, ev.MemberLimit, tags, ev.GroupId);
                         Events.Add(e);
                     }
 

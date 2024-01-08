@@ -27,7 +27,7 @@ namespace Domain.Entities
         {
             
         }
-        public Event(string name, string desc, DateTime when, string location, int memlimit, string tag, Guid owner)
+        public Event(string name, string desc, DateTime when, string location, int memlimit, string tag, Guid owner, int groupId)
         {
             Name = name;
             Description = desc;
@@ -36,6 +36,7 @@ namespace Domain.Entities
             MemberLimit = memlimit;
             Tag = tag;
             Owner = owner;
+            GroupId = groupId;
            
         }
 
