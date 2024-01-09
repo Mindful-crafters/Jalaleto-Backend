@@ -11,6 +11,6 @@ namespace Application.ViewModel.UserVM
         public DateOnly Birthday { get; set; }
         public string? Password { get; set; } = string.Empty;
         public IFormFile? image { get; set; }
-        public List<string> Interests { get; set; }
+        public List<string>? Interests { get; set; }
     }
 }

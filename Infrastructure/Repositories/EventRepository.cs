@@ -178,6 +178,11 @@ namespace Infrastructure.Repositories
                 {
                     throw new Exception("Event id is not valid!(event doesnt exists)");
                 }
+                var gpMember = await _db.GroupMembers.FirstOrDefaultAsync(gpm => gpm.GroupId == groupId && gpm.UserId == userId);
+                if (gpMember == null)
+                {
+                    return ApiResponse.Error("cant join event before joining group of that event");
+                }
                 var evntMember = await _db.EventsMembers
                     .FirstOrDefaultAsync(evm => (evm.UserId == userId) && (evm.EventId == eventId));
                 if (evntMember != null)
