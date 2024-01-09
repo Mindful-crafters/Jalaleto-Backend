@@ -328,7 +328,7 @@ namespace Infrastructure.Repositories
                     }
                     user.UserName = request.UserName;
                 }
-                if (request.Password == null)
+                if (request.Password != null)
                 {
                     HashService.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
                     user.PasswordHash = passwordHash;
@@ -337,12 +337,17 @@ namespace Infrastructure.Repositories
 
 
                 string interests = "";
-                foreach (var str in request.Interests)
+
+                if (request.Interests != null)
                 {
-                    interests = string.Concat(str+" ", interests);
+                    foreach (var str in request.Interests)
+                    {
+                        interests = string.Concat(str + " ", interests);
+                    }
+                    interests = interests.Trim();
                 }
-                interests = interests.Trim();
                 user.Interests = interests;
+                
 
 
                 //image

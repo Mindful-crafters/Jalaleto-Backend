@@ -156,5 +156,53 @@ namespace Infrastructure.Repositories
                 return ApiResponse.Error(ex.Message);
             }
         }
+
+
+
+        public async Task<ApiResponse> JoinEvent(int groupId, Guid userId, Guid eventId)
+        {
+            try
+            {
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                if (user == null)
+                {
+                    return ApiResponse.Error("user not found");
+                }
+                var group = await _db.Groups.FirstOrDefaultAsync(gp => gp.GroupId == groupId);
+                if (group == null)
+                {
+                    throw new Exception("Group id is not valid!");
+                }
+                var evnt = await _db.Events.FirstOrDefaultAsync(ev => ev.EventId == eventId);
+                if (group == null)
+                {
+                    throw new Exception("Event id is not valid!(event doesnt exists)");
+                }
+                var gpMember = await _db.GroupMembers.FirstOrDefaultAsync(gpm => gpm.GroupId == groupId && gpm.UserId == userId);
+                if (gpMember == null)
+                {
+                    return ApiResponse.Error("cant join event before joining group of that event");
+                }
+                var evntMember = await _db.EventsMembers
+                    .FirstOrDefaultAsync(evm => (evm.UserId == userId) && (evm.EventId == eventId));
+                if (evntMember != null)
+                {
+                    throw new Exception("already joined");
+                }
+                var eventMembers = await _db.EventsMembers.Where(evm => evm.EventId == eventId).ToListAsync();
+                if(eventMembers.Count + 1 > evnt.MemberLimit)
+                {
+                    return ApiResponse.Error("cant join to event due to  member limit!");
+                }
+                evntMember = new EventMembers(userId, eventId, groupId);
+                await _db.AddAsync(evntMember);
+                await _db.SaveChangesAsync();
+                return ApiResponse.Ok();
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse.Error(ex.Message);
+            }
+        }
     }
 }
