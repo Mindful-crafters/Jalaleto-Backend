@@ -11,9 +11,9 @@ namespace Application.ViewModel.MessageVM
 {
     public class GetMessageResponseModel: ApiResponse
     {
-        public List<Message> Data { get; set; } = new List<Message>();
+        public List<MessageModelForFront> Data { get; set; } = new List<MessageModelForFront>();
 
-        public GetMessageResponseModel(List<Message> messages)
+        public GetMessageResponseModel(List<MessageModelForFront> messages)
         {
             Success = true;
             Code = 200;

@@ -83,6 +83,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHub<SignalHub>("Hub");
+app.MapHub<MessageHub>("MessageHub");
 
 app.MapControllers();
 
