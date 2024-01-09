@@ -2,21 +2,18 @@
 using Application.RepositoryInterfaces;
 using Application.ViewModel.MessageVM;
 using Domain.Entities;
+using Infrastructure.Hubs;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories
 {
-    public class MessageRepository: IMessageRepository
+    public class MessageRepository : IMessageRepository
     {
         private readonly ApplicationDbContext _db;
         private readonly IConfiguration _configuration;
+        private IHubContext<MessageHub> _hub;
 
         public MessageRepository(ApplicationDbContext db, IConfiguration configuration)
         {
@@ -50,6 +47,8 @@ namespace Infrastructure.Repositories
                 await _db.Messages.AddAsync(message);
                 await _db.SaveChangesAsync();
 
+                var jsonMsssage = Newtonsoft.Json.JsonConvert.SerializeObject(message);
+                await _hub.Clients.Groups(request.GroupId.ToString()).SendAsync(jsonMsssage);
                 return ApiResponse.Ok("Message sent!");
 
             }
@@ -81,11 +80,22 @@ namespace Infrastructure.Repositories
                     throw new Exception("User is not member of group!");
                 }
 
-                List<Message> messages = 
-                    await _db.Messages
-                        .Where((message) => message.GroupId == groupId)
-                        .OrderBy((message) => message.SentTime)
-                        .ToListAsync();
+                List<MessageModelForFront> messages = await _db.Messages
+                    .Where(message => message.GroupId == groupId)
+                    .OrderBy(message => message.SentTime)
+                    .Select(message => new MessageModelForFront
+                    {
+                        MessageId = message.MessageId,
+                        GroupId = message.GroupId,
+                        SenderUserId = message.SenderUserId,
+                        Content = message.Content,
+                        SentTime = message.SentTime,
+                        SenderName = _db.Users.Where(u => u.Id == message.SenderUserId).Select(u => u.FirstName + " " + u.LastName).FirstOrDefault()!,
+                        SenderImageUrl = _db.Users.Where(u => u.Id == message.SenderUserId).Select(u => u.ImagePath).FirstOrDefault()!,
+                        AreYouSender = (message.SenderUserId == userId), // Replace with the actual user ID
+                    })
+                    .ToListAsync();
+
 
                 return new GetMessageResponseModel(messages);
 
