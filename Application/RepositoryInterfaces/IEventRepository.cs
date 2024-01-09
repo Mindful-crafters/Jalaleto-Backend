@@ -13,6 +13,7 @@ namespace Application.RepositoryInterfaces
         public Task<ApiResponse> CreateEvent(CreateEventRequestModel request, Guid userId);
         public Task<ApiResponse> Events(List<string> filter, Guid userId);
         public Task<ApiResponse> JoinEvent(int groupId, Guid userId, Guid eventId);
+        public Task<ApiResponse> EventInfo(EventInfoRequestModel request, Guid eventId);
 
     }
 }

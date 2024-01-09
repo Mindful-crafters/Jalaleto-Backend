@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using Application.EntityModels;
 using System.Text.RegularExpressions;
 using EventInfo = Application.EntityModels.EventInfo;
+using Azure;
 
 namespace Infrastructure.Repositories
 {
@@ -72,6 +73,88 @@ namespace Infrastructure.Repositories
             }
         }
 
+        public async Task<ApiResponse> EventInfo(EventInfoRequestModel request, Guid userId)
+        {
+            try
+            {
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                if (user == null)
+                {
+                    return ApiResponse.Error("user not found");
+                }
+                string accessKey = _configuration.GetSection("Liara:Accesskey").Value;
+                string secretKey = _configuration.GetSection("Liara:SecretKey").Value;
+                string bucketName = _configuration.GetSection("Liara:BucketName").Value;
+                string endPoint = _configuration.GetSection("Liara:EndPoint").Value;
+
+                ListObjectsV2Request r = new ListObjectsV2Request
+                {
+                    BucketName = bucketName
+                };
+                var credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
+                var config = new AmazonS3Config
+                {
+                    ServiceURL = endPoint,
+                    ForcePathStyle = true
+                };
+                using var client = new AmazonS3Client(credentials, config);
+                ListObjectsV2Response response = await client.ListObjectsV2Async(r);
+
+
+                List<Event> userEventsWithInfo = new List<Event>();
+                var userEvents = await _db.EventsMembers.Where(evm => evm.UserId == userId).ToListAsync();
+                foreach (var userEvent in userEvents)
+                {
+                    var evnt = await _db.Events.FirstOrDefaultAsync(ev => ev.EventId == userEvent.EventId);
+                    userEventsWithInfo.Add(evnt);
+                }
+
+                var wantedEvents = userEventsWithInfo.Where(x => (x.When >= request.From && x.When <= request.To)).ToList();
+                List<EventInfo> events = new List<EventInfo>();
+                if(wantedEvents == null)
+                {
+                    return new EventInfoResponseModel(events);
+                }
+                foreach (var ev in wantedEvents)
+                {
+                    List<UserInfo> Members = new List<UserInfo>();
+                    var members = await _db.EventsMembers.Where(x => x.EventId == ev.EventId).ToListAsync();
+                    foreach (var m in members)
+                    {
+                        var ux = await _db.Users.FirstOrDefaultAsync(u => u.Id == m.UserId);
+                        var uinfo = new UserInfo(ux.Mail, ux.FirstName, ux.LastName, ux.UserName, ux.Birthday);
+                        uinfo.Image = "";
+                        foreach (S3Object entry in response.S3Objects)
+                        {
+                            if (entry.Key == ux.ImagePath)
+                            {
+                                GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
+                                {
+                                    BucketName = bucketName,
+                                    Key = entry.Key,
+                                    Expires = DateTime.Now.AddHours(1)
+                                };
+                                uinfo.Image = client.GetPreSignedURL(urlRequest);
+                                break;
+                            }
+                        }
+                        Members.Add(uinfo);
+                    }
+                    List<string> tags = ev.Tag.Split().ToList();
+
+
+                    EventInfo evnt = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, Members, ev.MemberLimit, tags, ev.GroupId);
+                    events.Add(evnt);
+                }
+                return new EventInfoResponseModel(events);
+
+            }
+            catch(Exception ex)
+            {
+                return ApiResponse.Error(ex.Message);
+            }
+        }
+
         public async Task<ApiResponse> Events(List<string>? filter, Guid userId)
         {
             try
@@ -102,7 +185,7 @@ namespace Infrastructure.Repositories
                 List<EventInfo> events = new List<EventInfo>();
                 var allEvents = await _db.Events.Select(x => x).ToListAsync();
                 List<Event> Evs = new List<Event>();
-                if (filter.Count != 0)
+                if (filter ==  null || filter.Count == 0 || filter[0] == "")
                 {
                     foreach(string tag in filter){
                         foreach (var ev in allEvents)

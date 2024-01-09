@@ -51,6 +51,18 @@ namespace WebAPI.Controllers
             }
             return await _groupRepository.JoinEvent(groupId, Guid.Parse(UserIdString), eventId);
         }
+        [HttpPost]
+        [Authorize]
+        [Route("Info")]
+        public async Task<ApiResponse> EventInfo(EventInfoRequestModel request)
+        {
+            string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
+            if (string.IsNullOrWhiteSpace(UserIdString))
+            {
+                return ApiResponse.Unauthorized();
+            }
+            return await _groupRepository.EventInfo(request, Guid.Parse(UserIdString));
+        }
 
     }
 }
