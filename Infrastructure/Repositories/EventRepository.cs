@@ -240,8 +240,6 @@ namespace Infrastructure.Repositories
             }
         }
 
-
-
         public async Task<ApiResponse> JoinEvent(int groupId, Guid userId, Guid eventId)
         {
             try

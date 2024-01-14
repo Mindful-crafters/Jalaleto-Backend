@@ -56,6 +56,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidateIssuer = false,
         ValidateAudience = false,
         ClockSkew = TimeSpan.Zero,
+        ValidateLifetime = true,
     };
 });
 
@@ -82,7 +83,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHub<SignalHub>("Hub");
 app.MapHub<MessageHub>("MessageHub");
 
 app.MapControllers();

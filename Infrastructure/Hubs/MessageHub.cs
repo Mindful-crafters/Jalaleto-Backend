@@ -6,10 +6,11 @@ namespace Infrastructure.Hubs
 {
     public sealed class MessageHub : Hub
     {
-        public void joinGroupHub(string groupId)
+        public void joinGroupHub(int groupId)
         {
-            Groups.AddToGroupAsync(Context.ConnectionId, groupId);
-            Clients.Client(Context.ConnectionId).SendAsync("clientMethodName", $"You joined to group hub successfully");
+            var connectionId = Context.ConnectionId;
+            Groups.AddToGroupAsync(connectionId, groupId.ToString());
+            Clients.Client(connectionId).SendAsync("joinGroup", $"You joined to group hub successfully");
         }
 
         public override Task OnConnectedAsync()

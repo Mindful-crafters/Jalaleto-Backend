@@ -12,13 +12,12 @@ namespace Infrastructure.Repositories
     public class MessageRepository : IMessageRepository
     {
         private readonly ApplicationDbContext _db;
-        private readonly IConfiguration _configuration;
-        private IHubContext<MessageHub> _hub;
+        private IHubContext<MessageHub> _messageHub;
 
-        public MessageRepository(ApplicationDbContext db, IConfiguration configuration)
+        public MessageRepository(ApplicationDbContext db, IConfiguration configuration, IHubContext<MessageHub> messageHub)
         {
             _db = db;
-            _configuration = configuration;
+            _messageHub = messageHub;
         }
 
         public async Task<ApiResponse> SendMessage(SendMessageRequestModel request, Guid userId)
@@ -43,12 +42,22 @@ namespace Infrastructure.Repositories
                     throw new Exception("User is not member of group!");
                 }
 
-                Message message = new Message(request.GroupId, userId, request.Message);
-                await _db.Messages.AddAsync(message);
+                Message messageForDataBase = new Message(request.GroupId, userId, request.Message);
+                await _db.Messages.AddAsync(messageForDataBase);
                 await _db.SaveChangesAsync();
 
-                var jsonMsssage = Newtonsoft.Json.JsonConvert.SerializeObject(message);
-                await _hub.Clients.Groups(request.GroupId.ToString()).SendAsync(jsonMsssage);
+                MessageModelForFront messageForFront = new MessageModelForFront
+                {
+                    MessageId = messageForDataBase.MessageId,
+                    GroupId = messageForDataBase.GroupId,
+                    SenderUserId = messageForDataBase.SenderUserId,
+                    Content = messageForDataBase.Content,
+                    SentTime = messageForDataBase.SentTime,
+                    SenderName = _db.Users.Where(u => u.Id == messageForDataBase.SenderUserId).Select(u => u.FirstName + " " + u.LastName).FirstOrDefault()!,
+                    SenderImageUrl = _db.Users.Where(u => u.Id == messageForDataBase.SenderUserId).Select(u => u.ImagePath).FirstOrDefault()!,
+                    AreYouSender = (messageForDataBase.SenderUserId == userId), // Replace with the actual user ID
+                };
+                await _messageHub.Clients.Groups(request.GroupId.ToString()).SendAsync("NewMessage", messageForFront);
                 return ApiResponse.Ok("Message sent!");
 
             }
