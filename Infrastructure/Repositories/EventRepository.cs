@@ -1,22 +1,13 @@
-﻿using Amazon.S3.Model;
-using Amazon.S3;
+﻿using Amazon.S3;
+using Amazon.S3.Model;
 using Application;
+using Application.EntityModels;
 using Application.RepositoryInterfaces;
 using Application.ViewModel.EventVM;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Application.EntityModels;
-using System.Text.RegularExpressions;
 using EventInfo = Application.EntityModels.EventInfo;
-using Azure;
 
 namespace Infrastructure.Repositories
 {
@@ -45,7 +36,7 @@ namespace Infrastructure.Repositories
                     return ApiResponse.Error("event name must be uniqe. this event name already exists");
                 }
                 var group = await _db.Groups.FirstOrDefaultAsync(gp => gp.GroupId == request.GroupId);
-   
+
                 if (group == null)
                 {
                     throw new Exception("Group id is not valid!");
@@ -111,7 +102,7 @@ namespace Infrastructure.Repositories
 
                 var wantedEvents = userEventsWithInfo.Where(x => (x.When >= request.From && x.When <= request.To)).ToList();
                 List<EventInfo> events = new List<EventInfo>();
-                if(wantedEvents == null)
+                if (wantedEvents == null)
                 {
                     return new EventInfoResponseModel(events);
                 }
@@ -149,7 +140,7 @@ namespace Infrastructure.Repositories
                 return new EventInfoResponseModel(events);
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return ApiResponse.Error(ex.Message);
             }
@@ -185,9 +176,10 @@ namespace Infrastructure.Repositories
                 List<EventInfo> events = new List<EventInfo>();
                 var allEvents = await _db.Events.Select(x => x).ToListAsync();
                 List<Event> Evs = new List<Event>();
-                if (filter ==  null || filter.Count == 0 || filter[0] == "")
+                if (filter == null || filter.Count == 0 || filter[0] == "")
                 {
-                    foreach(string tag in filter){
+                    foreach (string tag in filter)
+                    {
                         foreach (var ev in allEvents)
                         {
                             if (ev.Tag.Split().ToList().Contains(tag) && !Evs.Contains(ev))
@@ -234,7 +226,7 @@ namespace Infrastructure.Repositories
                 }
                 return new EventInfoResponseModel(events);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return ApiResponse.Error(ex.Message);
             }
@@ -271,7 +263,7 @@ namespace Infrastructure.Repositories
                     throw new Exception("already joined");
                 }
                 var eventMembers = await _db.EventsMembers.Where(evm => evm.EventId == eventId).ToListAsync();
-                if(eventMembers.Count + 1 > evnt.MemberLimit)
+                if (eventMembers.Count + 1 > evnt.MemberLimit)
                 {
                     return ApiResponse.Error("cant join to event due to  member limit!");
                 }
@@ -285,5 +277,36 @@ namespace Infrastructure.Repositories
                 return ApiResponse.Error(ex.Message);
             }
         }
+
+        public async Task<ApiResponse> AddEventReview(AddEventReviewRequestModel request, Guid userId)
+        {
+            try
+            {
+                var eventReview = new EventReview(request.Score, request.Text, request.EventId, userId);
+                await _db.EventReview.AddAsync(eventReview);
+                await _db.SaveChangesAsync();
+                return ApiResponse.Ok();
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse.Error(ex.Message);
+            }
+        }
+
+        public async Task<ApiResponse> GetEventReviews(GetEventReviewsRequestModel request, Guid userId)
+        {
+            try
+            {
+                var eventReviews = await _db.EventReview
+                    .Where(eventReview => eventReview.EventId == request.EventId).ToArrayAsync();
+
+                return new AddEventReviewResponseModel(eventReviews);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse.Error(ex.Message);
+            }
+        }
+
     }
 }

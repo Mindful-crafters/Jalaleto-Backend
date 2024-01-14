@@ -10,6 +10,7 @@ namespace Infrastructure
         public DbSet<Group> Groups { get; set; }
         public DbSet<GroupMembers> GroupMembers { get; set; }
         public DbSet<Event> Events { get; set; }
+        public DbSet<EventReview> EventReview { get; set; }
         public DbSet<EventMembers> EventsMembers { get; set; }
         public DbSet<Message> Messages { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)

@@ -10,10 +10,10 @@ namespace WebAPI.Controllers
     [ApiController]
     public class EventController : ControllerBase
     {
-        private readonly IEventRepository _groupRepository;
+        private readonly IEventRepository _eventRepository;
         public EventController(IEventRepository eventRepository)
         {
-            _groupRepository = eventRepository;
+            _eventRepository = eventRepository;
         }
         [HttpPost]
         [Authorize]
@@ -25,7 +25,7 @@ namespace WebAPI.Controllers
             {
                 return ApiResponse.Unauthorized();
             }
-            return await _groupRepository.CreateEvent(request, Guid.Parse(UserIdString));
+            return await _eventRepository.CreateEvent(request, Guid.Parse(UserIdString));
         }
         [HttpPost]
         [Authorize]
@@ -37,7 +37,7 @@ namespace WebAPI.Controllers
             {
                 return ApiResponse.Unauthorized();
             }
-            return await _groupRepository.Events(filter, Guid.Parse(UserIdString));
+            return await _eventRepository.Events(filter, Guid.Parse(UserIdString));
         }
         [HttpPost]
         [Authorize]
@@ -49,8 +49,9 @@ namespace WebAPI.Controllers
             {
                 return ApiResponse.Unauthorized();
             }
-            return await _groupRepository.JoinEvent(groupId, Guid.Parse(UserIdString), eventId);
+            return await _eventRepository.JoinEvent(groupId, Guid.Parse(UserIdString), eventId);
         }
+
         [HttpPost]
         [Authorize]
         [Route("Info")]
@@ -61,8 +62,35 @@ namespace WebAPI.Controllers
             {
                 return ApiResponse.Unauthorized();
             }
-            return await _groupRepository.EventInfo(request, Guid.Parse(UserIdString));
+            return await _eventRepository.EventInfo(request, Guid.Parse(UserIdString));
         }
 
+        [HttpPost]
+        [Authorize]
+        [Route("AddEventReview")]
+        public async Task<ApiResponse> AddEventReview(AddEventReviewRequestModel request)
+        {
+            string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
+            if (string.IsNullOrWhiteSpace(UserIdString))
+            {
+                return ApiResponse.Unauthorized();
+            }
+
+            return await _eventRepository.AddEventReview(request, Guid.Parse(UserIdString));
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("GetEventReviews")]
+        public async Task<ApiResponse> GetEventReviews(GetEventReviewsRequestModel request)
+        {
+            string UserIdString = User.Claims.First(x => x.Type == "UserId").Value;
+            if (string.IsNullOrWhiteSpace(UserIdString))
+            {
+                return ApiResponse.Unauthorized();
+            }
+
+            return await _eventRepository.GetEventReviews(request, Guid.Parse(UserIdString));
+        }
     }
 }
