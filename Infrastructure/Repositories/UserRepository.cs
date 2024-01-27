@@ -328,7 +328,7 @@ namespace Infrastructure.Repositories
                     }
                     user.UserName = request.UserName;
                 }
-                if (request.Password != null || request.Password != "")
+                if (request.Password != null)
                 {
                     HashService.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
                     user.PasswordHash = passwordHash;
