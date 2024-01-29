@@ -5,6 +5,7 @@ using Application.EntityModels;
 using Application.RepositoryInterfaces;
 using Application.ViewModel.EventVM;
 using Domain.Entities;
+using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using EventInfo = Application.EntityModels.EventInfo;
@@ -25,38 +26,82 @@ namespace Infrastructure.Repositories
         {
             try
             {
-                var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
-                if (user == null)
+                if (request.EventId == null)
                 {
-                    return ApiResponse.Error("user not found");
-                }
-                var evExists = await _db.Events.FirstOrDefaultAsync(ev => ev.Name == request.Name);
-                if (evExists != null)
-                {
-                    return ApiResponse.Error("event name must be uniqe. this event name already exists");
-                }
-                var group = await _db.Groups.FirstOrDefaultAsync(gp => gp.GroupId == request.GroupId);
+                    //new event
+                    var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                    if (user == null)
+                    {
+                        return ApiResponse.Error("user not found");
+                    }
+                    var evExists = await _db.Events.FirstOrDefaultAsync(ev => ev.Name == request.Name);
+                    if (evExists != null)
+                    {
+                        return ApiResponse.Error("event name must be uniqe. this event name already exists");
+                    }
+                    var group = await _db.Groups.FirstOrDefaultAsync(gp => gp.GroupId == request.GroupId);
 
-                if (group == null)
-                {
-                    throw new Exception("Group id is not valid!");
-                }
-                string tags = "";
-                foreach (var str in request.Tag)
-                {
-                    tags = string.Concat(str + " ", tags);
-                }
-                tags = tags.Trim();
+                    if (group == null)
+                    {
+                        throw new Exception("Group id is not valid!");
+                    }
+                    string tags = "";
+                    foreach (var str in request.Tag)
+                    {
+                        tags = string.Concat(str + " ", tags);
+                    }
+                    tags = tags.Trim();
 
-                Event e = new Event(request.Name, request.Description, request.When,
-                    request.Location, request.MemberLimit, tags, userId, request.GroupId);
-                await _db.AddAsync(e);
-                await _db.SaveChangesAsync();
-                var EventFromDb = await _db.Events.FirstOrDefaultAsync(ev => ev.Owner == userId && ev.Name == request.Name);
-                EventMembers evemtMember = new EventMembers(userId, EventFromDb.EventId, EventFromDb.GroupId);
-                await _db.AddAsync(evemtMember);
-                await _db.SaveChangesAsync();
-                return ApiResponse.Ok();
+                    Event e = new Event(request.Name, request.Description, request.When,
+                        request.Location, request.MemberLimit, tags, userId, request.GroupId);
+                    await _db.AddAsync(e);
+                    await _db.SaveChangesAsync();
+                    var EventFromDb = await _db.Events.FirstOrDefaultAsync(ev => ev.Owner == userId && ev.Name == request.Name);
+                    EventMembers evemtMember = new EventMembers(userId, EventFromDb.EventId, EventFromDb.GroupId);
+                    await _db.AddAsync(evemtMember);
+                    await _db.SaveChangesAsync();
+                    return ApiResponse.Ok();
+                }
+                else
+                {
+                    var exisitingEvent = await _db.Events.FindAsync(request.EventId);
+
+                    if (exisitingEvent != null)
+                    {
+                        if(exisitingEvent.Owner != userId)
+                        {
+                            return ApiResponse.Error("you are not the owner of this event to edit");
+                        }
+                        if (exisitingEvent.Name != request.Name)
+                        {
+                            var evExists = await _db.Events.FirstOrDefaultAsync(ev => ev.Name == request.Name);
+                            if (evExists != null)
+                            {
+                                return ApiResponse.Error("event name must be uniqe. this event name already exists");
+                            }
+                        }
+                        exisitingEvent.Name = request.Name;
+                        exisitingEvent.Description = request.Description;
+                        exisitingEvent.When = request.When;
+                        exisitingEvent.Location = request.Location;
+                        exisitingEvent.MemberLimit =request.MemberLimit;
+                        string tags = "";
+                        foreach (var str in request.Tag)
+                        {
+                            tags = string.Concat(str + " ", tags);
+                        }
+                        tags = tags.Trim();
+                        exisitingEvent.Tag = tags;
+                        // Save changes
+                        await _db.SaveChangesAsync();
+
+                        return ApiResponse.Ok();
+                    }
+                    else
+                    {
+                        return ApiResponse.Error("No existing event found with the provided eventID.");
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -132,9 +177,9 @@ namespace Infrastructure.Repositories
                         Members.Add(uinfo);
                     }
                     List<string> tags = ev.Tag.Split().ToList();
+                    bool maked = ev.Owner == userId;
 
-
-                    EventInfo evnt = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, Members, ev.MemberLimit, tags, ev.GroupId);
+                    EventInfo evnt = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, Members, ev.MemberLimit, tags, ev.GroupId, maked);
                     events.Add(evnt);
                 }
                 return new EventInfoResponseModel(events);
@@ -220,8 +265,8 @@ namespace Infrastructure.Repositories
                     }
                     List<string> tags = ev.Tag.Split().ToList();
 
-
-                    EventInfo evnt = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, Members, ev.MemberLimit, tags, ev.GroupId);
+                    bool maked = ev.Owner == userId;
+                    EventInfo evnt = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, Members, ev.MemberLimit, tags, ev.GroupId, maked);
                     events.Add(evnt);
                 }
                 return new EventInfoResponseModel(events);

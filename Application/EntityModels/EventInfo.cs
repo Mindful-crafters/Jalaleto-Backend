@@ -16,10 +16,10 @@ namespace Application.EntityModels
         public List<UserInfo> Members { get; set; }
         public int MemberLimit { get; set; }
         public List<string> Tag { get; set; } 
-
+        public bool Maked { get; set; }
 
         public EventInfo(Guid eid, string name, string desc, DateTime When, List<UserInfo> members, 
-            int memberlim , List<string>  tags, int groupId)
+            int memberlim , List<string>  tags, int groupId, bool maked)
         {
             EventId = eid;
             Name = name;
@@ -30,6 +30,7 @@ namespace Application.EntityModels
             MemberLimit = memberlim;
             Tag = tags;
             GroupId = groupId;
+            Maked = maked;
 
         }
     }

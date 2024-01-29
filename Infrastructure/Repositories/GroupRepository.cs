@@ -216,7 +216,8 @@ namespace Infrastructure.Repositories
                         EvMembers.Add(uinfo);
                     }
                     List<string> tags = ev.Tag.Split().ToList();
-                    EventInfo e = new EventInfo(ev.EventId, ev.Name,ev.Description, ev.When, EvMembers,ev.MemberLimit, tags, ev.GroupId);
+                    bool maked = ev.Owner == userId;
+                    EventInfo e = new EventInfo(ev.EventId, ev.Name,ev.Description, ev.When, EvMembers,ev.MemberLimit, tags, ev.GroupId, maked);
                     Events.Add(e);
                 }
 
@@ -330,7 +331,8 @@ namespace Infrastructure.Repositories
                             EvMembers.Add(uinfo);
                         }
                         List<string> tags = ev.Tag.Split().ToList();
-                        EventInfo e = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, EvMembers, ev.MemberLimit, tags, ev.GroupId);
+                        bool maked = ev.Owner == userId;
+                        EventInfo e = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, EvMembers, ev.MemberLimit, tags, ev.GroupId, maked);
                         Events.Add(e);
                     }
                     //gp image
@@ -452,7 +454,8 @@ namespace Infrastructure.Repositories
                             EvMembers.Add(uinfo);
                         }
                         List<string> tags = ev.Tag.Split().ToList();
-                        EventInfo e = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, EvMembers, ev.MemberLimit, tags, ev.GroupId);
+                        
+                        EventInfo e = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, EvMembers, ev.MemberLimit, tags, ev.GroupId, false);
                         Events.Add(e);
                     }
 
@@ -499,7 +502,7 @@ namespace Infrastructure.Repositories
                 }
                 else
                 {
-                    groupWithPattern = await _db.Groups.Where(gp => gp.Name == pattern).ToListAsync();
+                    groupWithPattern = await _db.Groups.Where(gp => gp.Name.Contains(pattern)).ToListAsync();
                 }
                 List<GroupInfo> groups = new List<GroupInfo>();
 
@@ -576,7 +579,8 @@ namespace Infrastructure.Repositories
                             EvMembers.Add(uinfo);
                         }
                         List<string> tags = ev.Tag.Split().ToList();
-                        EventInfo e = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, EvMembers, ev.MemberLimit, tags, ev.GroupId);
+                        bool maked = ev.Owner == userId;
+                        EventInfo e = new EventInfo(ev.EventId, ev.Name, ev.Description, ev.When, EvMembers, ev.MemberLimit, tags, ev.GroupId, maked);
                         Events.Add(e);
                     }
 
