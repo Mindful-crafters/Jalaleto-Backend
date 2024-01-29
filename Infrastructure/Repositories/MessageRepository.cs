@@ -29,11 +29,7 @@ namespace Infrastructure.Repositories
         {
             try
             {
-                var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
-                if (user == null)
-                {
-                    throw new Exception("User not found");
-                }
+                
                 var group = await _db.Groups
                     .Where((group) => group.GroupId == request.GroupId)
                     .ToListAsync();
@@ -72,9 +68,10 @@ namespace Infrastructure.Repositories
                 };
                 using var client = new AmazonS3Client(credentials, config);
                 ListObjectsV2Response response = await client.ListObjectsV2Async(r);
+                var senderUser = _db.Users.FirstOrDefault(x => x.Id == messageForDataBase.SenderUserId);
                 foreach (S3Object entry in response.S3Objects)
                 {
-                    if (entry.Key == user.ImagePath)
+                    if (entry.Key == senderUser.ImagePath)
                     {
                         GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
                         {
@@ -149,19 +146,8 @@ namespace Infrastructure.Repositories
                 };
                 using var client = new AmazonS3Client(credentials, config);
                 ListObjectsV2Response response = await client.ListObjectsV2Async(r);
-                foreach (S3Object entry in response.S3Objects)
-                {
-                    if (entry.Key == user.ImagePath)
-                    {
-                        GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
-                        {
-                            BucketName = bucketName,
-                            Key = entry.Key,
-                            Expires = DateTime.Now.AddHours(1)
-                        };
-                        outpath = client.GetPreSignedURL(urlRequest);
-                    }
-                }
+                
+                
                 List<MessageModelForFront> messages = await _db.Messages
                     .Where(message => message.GroupId == groupId)
                     .OrderBy(message => message.SentTime)
@@ -173,11 +159,29 @@ namespace Infrastructure.Repositories
                         Content = message.Content,
                         SentTime = message.SentTime,
                         SenderName = _db.Users.Where(u => u.Id == message.SenderUserId).Select(u => u.FirstName + " " + u.LastName).FirstOrDefault()!,
-                        SenderImageUrl = outpath,
+                        SenderImageUrl = "",
                         AreYouSender = (message.SenderUserId == userId), // Replace with the actual user ID
                     })
                     .ToListAsync();
-
+                foreach (var msg in messages)
+                {
+                    var msgUser = _db.Users.FirstOrDefault(x => x.Id ==  msg.SenderUserId);
+                    outpath = "";
+                    foreach (S3Object entry in response.S3Objects)
+                    {
+                        if (entry.Key == msgUser.ImagePath)
+                        {
+                            GetPreSignedUrlRequest urlRequest = new GetPreSignedUrlRequest
+                            {
+                                BucketName = bucketName,
+                                Key = entry.Key,
+                                Expires = DateTime.Now.AddHours(1)
+                            };
+                            outpath = client.GetPreSignedURL(urlRequest);
+                        }
+                    }
+                    msg.SenderImageUrl = outpath;
+                }
 
                 return new GetMessageResponseModel(messages);
 
