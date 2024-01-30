@@ -1,0 +1,259 @@
+Connected to smtp://jalaleto.ir:587/?starttls=always
+S: 220 WH1.home ESMTP MailEnable Service, Version: 10.46-- ready at 11/30/23 17:10:49
+C: EHLO Hanza
+S: 250-home [104.28.247.11], this server offers 5 extensions
+S: 250-AUTH LOGIN
+S: 250-SIZE 40960000
+S: 250-HELP
+S: 250-AUTH=LOGIN
+S: 250 STARTTLS
+C: STARTTLS
+S: 220 Ready to start TLS
+C: EHLO Hanza
+S: 250-home [104.28.247.11], this server offers 5 extensions
+S: 250-AUTH LOGIN
+S: 250-SIZE 40960000
+S: 250-HELP
+S: 250-AUTH=LOGIN
+S: 250 CLIENTID
+C: AUTH LOGIN
+S: 334 VXNlcm5hbWU6
+C: ********
+S: 334 UGFzc3dvcmQ6
+C: ********
+S: 235 Authenticated
+C: MAIL FROM:<support@jalaleto.ir> SIZE=268
+S: 250 Requested mail action okay, completed
+C: RCPT TO:<prsmgh@gmail.com>
+S: 250 Requested mail action okay, completed
+C: DATA
+S: 354 Start mail input; end with <CRLF>.<CRLF>
+C: From: support@jalaleto.ir
+C: Date: Thu, 30 Nov 2023 17:10:47 +0330
+C: Subject: =?utf-8?b?2qnYryDYqtin24zbjNivINis2YTYp9mE2KrZiA==?=
+C: Message-Id: <0OGDMMG3NLU4.C0UGI0NJOOFO1@hanza>
+C: To: prsmgh@gmail.com
+C: MIME-Version: 1.0
+C: Content-Type: text/html; charset=utf-8
+C: 
+C: 235082
+C: .
+S: 250 Requested mail action okay, completed
+C: QUIT
+S: 221 Service closing TLS SSL transmission session
+Connected to smtp://jalaleto.ir:587/?starttls=always
+S: 220 WH1.home ESMTP MailEnable Service, Version: 10.46-- ready at 11/30/23 23:47:23
+C: EHLO DESKTOP-D7RMKD4
+S: 250-home [5.201.249.130], this server offers 5 extensions
+S: 250-AUTH LOGIN
+S: 250-SIZE 40960000
+S: 250-HELP
+S: 250-AUTH=LOGIN
+S: 250 STARTTLS
+C: STARTTLS
+S: 220 Ready to start TLS
+C: EHLO DESKTOP-D7RMKD4
+S: 250-home [5.201.249.130], this server offers 5 extensions
+S: 250-AUTH LOGIN
+S: 250-SIZE 40960000
+S: 250-HELP
+S: 250-AUTH=LOGIN
+S: 250 CLIENTID
+C: AUTH LOGIN
+S: 334 VXNlcm5hbWU6
+C: ********
+S: 334 UGFzc3dvcmQ6
+C: ********
+S: 235 Authenticated
+C: MAIL FROM:<support@jalaleto.ir> SIZE=284
+S: 250 Requested mail action okay, completed
+C: RCPT TO:<madanipour66@gmail.com>
+S: 250 Requested mail action okay, completed
+C: DATA
+S: 354 Start mail input; end with <CRLF>.<CRLF>
+C: From: support@jalaleto.ir
+C: Date: Thu, 30 Nov 2023 23:47:23 +0330
+C: Subject: =?utf-8?b?2qnYryDYqtin24zbjNivINis2YTYp9mE2KrZiA==?=
+C: Message-Id: <44M8ZXH6NLU4.IHN4G45YX4B01@desktop-d7rmkd4>
+C: To: madanipour66@gmail.com
+C: MIME-Version: 1.0
+C: Content-Type: text/html; charset=utf-8
+C: 
+C: 942431
+C: .
+S: 250 Requested mail action okay, completed
+C: QUIT
+S: 221 Service closing TLS SSL transmission session
+Connected to smtp://jalaleto.ir:587/?starttls=always
+S: 220 WH1.home ESMTP MailEnable Service, Version: 10.46-- ready at 12/13/23 14:01:50
+C: EHLO DESKTOP-D7RMKD4
+S: 250-home [194.225.232.41], this server offers 5 extensions
+S: 250-AUTH LOGIN
+S: 250-SIZE 40960000
+S: 250-HELP
+S: 250-AUTH=LOGIN
+S: 250 STARTTLS
+C: STARTTLS
+S: 220 Ready to start TLS
+C: EHLO DESKTOP-D7RMKD4
+S: 250-home [194.225.232.41], this server offers 5 extensions
+S: 250-AUTH LOGIN
+S: 250-SIZE 40960000
+S: 250-HELP
+S: 250-AUTH=LOGIN
+S: 250 CLIENTID
+C: AUTH LOGIN
+S: 334 VXNlcm5hbWU6
+C: ********
+S: 334 UGFzc3dvcmQ6
+C: ********
+S: 235 Authenticated
+C: MAIL FROM:<support@jalaleto.ir> SIZE=286
+S: 250 Requested mail action okay, completed
+C: RCPT TO:<m.rezatajikmmm@gmail.com>
+S: 250 Requested mail action okay, completed
+C: DATA
+S: 354 Start mail input; end with <CRLF>.<CRLF>
+C: From: support@jalaleto.ir
+C: Date: Wed, 13 Dec 2023 14:01:49 +0330
+C: Subject: =?utf-8?b?2qnYryDYqtin24zbjNivINis2YTYp9mE2KrZiA==?=
+C: Message-Id: <LC937GC1RLU4.YFZ6JW4OR5E81@desktop-d7rmkd4>
+C: To: m.rezatajikmmm@gmail.com
+C: MIME-Version: 1.0
+C: Content-Type: text/html; charset=utf-8
+C: 
+C: 738549
+C: .
+S: 250 Requested mail action okay, completed
+C: QUIT
+S: 221 Service closing TLS SSL transmission session
+Connected to smtp://jalaleto.ir:587/?starttls=always
+S: 220 WH1.home ESMTP MailEnable Service, Version: 10.46-- ready at 12/13/23 16:00:14
+C: EHLO DESKTOP-D7RMKD4
+S: 250-home [194.225.232.41], this server offers 5 extensions
+S: 250-AUTH LOGIN
+S: 250-SIZE 40960000
+S: 250-HELP
+S: 250-AUTH=LOGIN
+S: 250 STARTTLS
+C: STARTTLS
+S: 220 Ready to start TLS
+C: EHLO DESKTOP-D7RMKD4
+S: 250-home [194.225.232.41], this server offers 5 extensions
+S: 250-AUTH LOGIN
+S: 250-SIZE 40960000
+S: 250-HELP
+S: 250-AUTH=LOGIN
+S: 250 CLIENTID
+C: AUTH LOGIN
+S: 334 VXNlcm5hbWU6
+C: ********
+S: 334 UGFzc3dvcmQ6
+C: ********
+S: 235 Authenticated
+C: MAIL FROM:<support@jalaleto.ir> SIZE=281
+S: 250 Requested mail action okay, completed
+C: RCPT TO:<sajadmrjll@gmail.com>
+S: 250 Requested mail action okay, completed
+C: DATA
+S: 354 Start mail input; end with <CRLF>.<CRLF>
+C: From: support@jalaleto.ir
+C: Date: Wed, 13 Dec 2023 16:00:12 +0330
+C: Subject: =?utf-8?b?2qnYryDYqtin24zbjNivINis2YTYp9mE2KrZiA==?=
+C: Message-Id: <9THPX292RLU4.4HNMLR3OO3PE@desktop-d7rmkd4>
+C: To: sajadmrjll@gmail.com
+C: MIME-Version: 1.0
+C: Content-Type: text/html; charset=utf-8
+C: 
+C: 587564
+C: .
+S: 250 Requested mail action okay, completed
+C: QUIT
+S: 221 Service closing TLS SSL transmission session
+Connected to smtp://jalaleto.ir:587/?starttls=always
+S: 220 WH1.home ESMTP MailEnable Service, Version: 10.46-- ready at 12/16/23 11:53:58
+C: EHLO DESKTOP-D7RMKD4
+S: 250-home [2.147.149.241], this server offers 5 extensions
+S: 250-AUTH LOGIN
+S: 250-SIZE 40960000
+S: 250-HELP
+S: 250-AUTH=LOGIN
+S: 250 STARTTLS
+C: STARTTLS
+S: 220 Ready to start TLS
+C: EHLO DESKTOP-D7RMKD4
+S: 250-home [2.147.149.241], this server offers 5 extensions
+S: 250-AUTH LOGIN
+S: 250-SIZE 40960000
+S: 250-HELP
+S: 250-AUTH=LOGIN
+S: 250 CLIENTID
+C: AUTH LOGIN
+S: 334 VXNlcm5hbWU6
+C: ********
+S: 334 UGFzc3dvcmQ6
+C: ********
+S: 235 Authenticated
+C: MAIL FROM:<support@jalaleto.ir> SIZE=290
+S: 250 Requested mail action okay, completed
+C: RCPT TO:<www.mahdiesteghlal@gmail.com>
+S: 250 Requested mail action okay, completed
+C: DATA
+S: 354 Start mail input; end with <CRLF>.<CRLF>
+C: From: support@jalaleto.ir
+C: Date: Sat, 16 Dec 2023 11:53:57 +0330
+C: Subject: =?utf-8?b?2qnYryDYqtin24zbjNivINis2YTYp9mE2KrZiA==?=
+C: Message-Id: <Y7XQDYFXRLU4.EGTZ40BCDJ7G2@desktop-d7rmkd4>
+C: To: www.mahdiesteghlal@gmail.com
+C: MIME-Version: 1.0
+C: Content-Type: text/html; charset=utf-8
+C: 
+C: 307582
+C: .
+S: 250 Requested mail action okay, completed
+C: QUIT
+S: 221 Service closing TLS SSL transmission session
+Connected to smtp://jalaleto.ir:587/?starttls=always
+S: 220 WH1.home ESMTP MailEnable Service, Version: 10.46-- ready at 01/02/24 14:27:15
+C: EHLO DESKTOP-D7RMKD4
+S: 250-home [194.225.232.9], this server offers 5 extensions
+S: 250-AUTH LOGIN
+S: 250-SIZE 40960000
+S: 250-HELP
+S: 250-AUTH=LOGIN
+S: 250 STARTTLS
+C: STARTTLS
+S: 220 Ready to start TLS
+C: EHLO DESKTOP-D7RMKD4
+S: 250-home [194.225.232.9], this server offers 5 extensions
+S: 250-AUTH LOGIN
+S: 250-SIZE 40960000
+S: 250-HELP
+S: 250-AUTH=LOGIN
+S: 250 CLIENTID
+C: AUTH LOGIN
+S: 334 VXNlcm5hbWU6
+C: ********
+S: 334 UGFzc3dvcmQ6
+C: ********
+S: 235 Authenticated
+C: MAIL FROM:<support@jalaleto.ir> SIZE=331
+S: 250 Requested mail action okay, completed
+C: RCPT TO:<madanipour66@gmail.com>
+S: 250 Requested mail action okay, completed
+C: DATA
+S: 354 Start mail input; end with <CRLF>.<CRLF>
+C: From: support@jalaleto.ir
+C: Date: Tue, 02 Jan 2024 14:27:14 +0330
+C: Subject: =?utf-8?b?2qnYryDYqtin24zbjNivINiq2LrbjNuM2LEg2b7Ys9mI2LHYrw==?=
+C:  =?utf-8?b?INis2YTYp9mE2KrZiA==?=
+C: Message-Id: <UBY14S16XLU4.0O5HMLKISS262@desktop-d7rmkd4>
+C: To: madanipour66@gmail.com
+C: MIME-Version: 1.0
+C: Content-Type: text/html; charset=utf-8
+C: 
+C: 475086
+C: .
+S: 250 Requested mail action okay, completed
+C: QUIT
+S: 221 Service closing TLS SSL transmission session

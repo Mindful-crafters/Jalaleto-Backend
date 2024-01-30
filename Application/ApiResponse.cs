@@ -15,7 +15,24 @@
                 Message = msg,
             };
         }
-
+        public static ApiResponse Error(string msg = "error")
+        {
+            return new ApiResponse()
+            {
+                Success = false,
+                Code = 500,
+                Message = msg,
+            };
+        }
+        public static ApiResponse Unauthorized()
+        {
+            return new ApiResponse()
+            {
+                Success = false,
+                Code = 401,
+                Message = "Unauthorized",
+            };
+        }
 
     }
 }
